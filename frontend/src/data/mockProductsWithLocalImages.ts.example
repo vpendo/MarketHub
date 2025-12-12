@@ -1,0 +1,42 @@
+// EXAMPLE: How to use local images from assets folder
+// Rename this file to mockProducts.ts and update imports
+
+import type { Product } from "../types/product";
+
+// Import your local images
+import product1Img from "../assets/images/product1.jpg";
+import product2Img from "../assets/images/product2.jpg";
+import product3Img from "../assets/images/product3.jpg";
+// ... import more images
+
+export const mockProducts: Product[] = [
+  {
+    id: "1",
+    name: "Wireless Bluetooth Headphones",
+    description: "Premium noise-cancelling headphones with 30-hour battery life.",
+    price: 129.99,
+    category: "Electronics",
+    stock: 25,
+    image: product1Img, // Use imported local image
+  },
+  {
+    id: "2",
+    name: "Smart Watch Pro",
+    description: "Advanced fitness tracking with heart rate monitor.",
+    price: 299.99,
+    category: "Electronics",
+    stock: 15,
+    image: product2Img, // Use imported local image
+  },
+  {
+    id: "3",
+    name: "Leather Backpack",
+    description: "Stylish and durable leather backpack.",
+    price: 89.99,
+    category: "Fashion",
+    stock: 30,
+    image: product3Img, // Use imported local image
+  },
+  // ... add more products
+];
+
