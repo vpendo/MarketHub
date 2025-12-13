@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Product } from "../types/product";
 
+
 type ProductState = {
   products: Product[];
   selected: Product | null;
@@ -12,6 +13,7 @@ type ProductState = {
 };
 
 // Start with an empty list. Products should be added via admin UI or loaded from API.
+
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
   selected: null,

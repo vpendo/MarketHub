@@ -4,7 +4,7 @@ import { Mail, ShoppingBag, ShieldCheck } from "lucide-react";
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="bg-slate-950 text-slate-200">
+    <footer role="contentinfo" className="bg-slate-950 text-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-6 grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-white">
@@ -29,7 +29,7 @@ export default function Footer() {
 
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-white">Stay in the loop</h3>
-          <form className="space-y-2">
+          <form className="space-y-2" aria-label="Newsletter signup">
             <label className="sr-only" htmlFor="newsletter-email">Email</label>
             <div className="flex items-center gap-2 rounded-lg bg-slate-900 border border-slate-800 px-3 py-2">
               <Mail size={16} className="text-slate-400" />
