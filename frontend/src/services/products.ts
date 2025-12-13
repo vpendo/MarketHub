@@ -1,31 +1,19 @@
 import api from "./api";
-import { mockProducts } from "../data/mockProducts";
 import type { Product } from "../types/product";
 
-// Fetch all products - uses mock data if API fails
+// Fetch all products from API. On error, return empty array (no fallback to mock data).
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const res = await api.get("/products/");
     return res.data;
   } catch (error) {
-    // If API fails, return mock data
-    console.log("Using mock product data");
-    return mockProducts;
+    console.error("fetchProducts error:", error);
+    return [];
   }
 };
 
-// Fetch single product - uses mock data if API fails
+// Fetch single product from API. Throw on error so caller can handle fallback (e.g., productStore lookup).
 export const fetchProduct = async (id: string): Promise<Product> => {
-  try {
-    const res = await api.get(`/products/${id}/`);
-    return res.data;
-  } catch (error) {
-    // If API fails, return mock product
-    console.log("Using mock product data");
-    const product = mockProducts.find((p) => p.id === id);
-    if (product) {
-      return product;
-    }
-    throw new Error("Product not found");
-  }
+  const res = await api.get(`/products/${id}/`);
+  return res.data;
 };

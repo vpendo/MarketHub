@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShoppingBag, TrendingUp, Shield, Truck, Star, ArrowRight } from "lucide-react";
-import { mockProducts } from "../data/mockProducts";
+import { useProductStore } from "../store/productStore";
 
 export default function Home() {
   const features = [
@@ -59,7 +59,9 @@ export default function Home() {
     },
   ];
 
-  const featured = mockProducts.slice(0, 4);
+  const products = useProductStore((s) => s.products);
+  const featured = products.slice(0, 4);
+  const featured0 = featured.length > 0 ? featured[0] : null;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -93,21 +95,27 @@ export default function Home() {
             </div>
           </div>
           <div className="hidden lg:block">
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl border border-white/20">
-              <img
-                src={featured[0].image}
-                alt={featured[0].name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white space-y-1">
-                <p className="text-sm uppercase tracking-[0.2em] text-blue-100">Featured</p>
-                <h3 className="text-xl font-semibold">{featured[0].name}</h3>
-                <p className="text-sm text-blue-100 line-clamp-2 max-w-md">
-                  {featured[0].description}
-                </p>
+            {featured0 ? (
+              <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl border border-white/20">
+                <img
+                  src={featured0.image || "/placeholder.png"}
+                  alt={featured0.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white space-y-1">
+                  <p className="text-sm uppercase tracking-[0.2em] text-blue-100">Featured</p>
+                  <h3 className="text-xl font-semibold">{featured0.name}</h3>
+                  <p className="text-sm text-blue-100 line-clamp-2 max-w-md">
+                    {featured0.description}
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                <p>No featured products yet</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full -mr-48 -mt-48"></div>

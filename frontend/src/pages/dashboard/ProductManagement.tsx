@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useUserStore } from "../../store/userStore";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,15 @@ const productSchema = z.object({
 type ProductForm = z.infer<typeof productSchema>;
 
 export default function ProductManagement() {
+  const user = useUserStore((s) => s.user);
+  if (!user || user.role !== "admin") {
+    return (
+      <div className="p-6">
+        <h2 className="text-xl font-semibold">Unauthorized</h2>
+        <p className="text-sm text-slate-600 mt-2">You do not have access to manage products.</p>
+      </div>
+    );
+  }
   const { products, setProducts } = useProductStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
