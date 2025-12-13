@@ -38,7 +38,7 @@ python manage.py createsuperuser
 4. Start the development server:
 
 ```bash
-python manage.py runserver
+
 ```
 
 5. Access the API at `http://localhost:8000/api/` and admin at `http://localhost:8000/admin/`.
