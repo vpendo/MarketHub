@@ -30,6 +30,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   const setUser = useUserStore((s) => s.setUser);
   const {
@@ -51,11 +52,16 @@ export default function Register() {
 
   const onSubmit = async ({ name, email, password }: RegisterForm) => {
     try {
-      const user = await registerApi({ name, email, password });
-      setUser(user);
-      navigate("/");
+      setAuthError(null);
+      await registerApi({ name, email, password });
+      // After successful registration, redirect user to login to sign in
+      navigate("/login", { state: { successMessage: 'Account created. Please sign in.' } });
     } catch (error) {
-      console.error("Registration error:", error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const e: any = error;
+      const msg = e?.response?.data?.detail || JSON.stringify(e?.response?.data) || e?.message || "Registration failed";
+      console.error("Registration error:", msg);
+      setAuthError(String(msg));
     }
   };
 
@@ -78,6 +84,9 @@ export default function Register() {
         {/* Register Form */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {authError && (
+              <div className="p-3 bg-red-50 text-red-700 rounded mb-2">{authError}</div>
+            )}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Full Name

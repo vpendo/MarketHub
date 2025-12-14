@@ -18,6 +18,8 @@ class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(min_length=2)
     email = serializers.EmailField()
     password = serializers.CharField(min_length=6)
+    # optional flag: when false, do not return an auth token in the response
+    return_token = serializers.BooleanField(required=False, default=True)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -48,8 +50,21 @@ class RegisterAPIView(APIView):
         else:
             user.first_name = data['name']
         user.save()
-        refresh = RefreshToken.for_user(user)
-        return Response({"user": user_to_dict(user), "token": str(refresh.access_token)})
+
+        # Determine whether to return token: allow override via JSON field or query param
+        return_token = data.get('return_token', True)
+        qp = request.query_params.get('return_token')
+        if qp is not None:
+            # accept 'false' / '0' as False
+            if str(qp).lower() in ('0', 'false', 'no'):
+                return_token = False
+            else:
+                return_token = True
+
+        if return_token:
+            refresh = RefreshToken.for_user(user)
+            return Response({"user": user_to_dict(user), "token": str(refresh.access_token)})
+        return Response({"user": user_to_dict(user)})
 
 
 class LoginAPIView(APIView):

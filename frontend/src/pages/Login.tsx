@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Eye, EyeOff, ShoppingBag, Lock } from "lucide-react";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
@@ -20,6 +20,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const setUser = useUserStore((s) => s.setUser);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const location = useLocation();
+  const successMessage = (location.state as any)?.successMessage as string | undefined;
   const {
     register,
     handleSubmit,
@@ -30,11 +33,16 @@ export default function Login() {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      const user = await loginApi(data.email, data.password);
-      setUser(user);
+      setAuthError(null);
+      const res = await loginApi(data.email, data.password);
+      setUser({ ...res.user, token: res.token });
       navigate("/");
     } catch (error) {
-      console.error("Login error:", error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const e: any = error;
+      const msg = e?.response?.data?.detail || JSON.stringify(e?.response?.data) || e?.message || "Login failed";
+      console.error("Login error:", msg);
+      setAuthError(String(msg));
     }
   };
 
@@ -57,6 +65,12 @@ export default function Login() {
         {/* Login Form */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {successMessage && (
+              <div className="p-3 bg-green-50 text-green-700 rounded mb-2">{successMessage}</div>
+            )}
+            {authError && (
+              <div className="p-3 bg-red-50 text-red-700 rounded mb-2">{authError}</div>
+            )}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Email Address
