@@ -58,9 +58,6 @@ export default function ProductCard({
           <Button
             onClick={() => onAdd?.(product)}
             className="flex-1 bg-primary text-white flex items-center justify-center gap-2 hover:bg-primary-600"
-            disabled={product.stock === 0}
-            aria-disabled={product.stock === 0}
-            aria-label={product.stock === 0 ? "Out of stock" : `Add ${product.name} to cart`}
           >
             <ShoppingCart className="w-4 h-4" />
             Add to Cart
@@ -73,7 +70,7 @@ export default function ProductCard({
                 : "border-slate-300 dark:border-slate-700 hover:border-primary"
             }`}
             aria-pressed={wished}
-            aria-label={wished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-label="Toggle wishlist"
           >
             <Heart className={`w-5 h-5 ${wished ? "fill-current" : ""}`} />
           </button>
@@ -86,7 +83,6 @@ export default function ProductCard({
               : "border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
           }`}
           aria-pressed={comparing}
-          aria-label={comparing ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
         >
           <GitCompare className="w-4 h-4" />
           {comparing ? "Remove from Compare" : "Compare"}

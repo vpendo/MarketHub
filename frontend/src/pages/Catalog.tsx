@@ -22,23 +22,15 @@ export default function Catalog() {
     onSuccess: setProducts,
   });
 
-  // MarketHub focus categories
-  const ALLOWED_CATEGORIES = ["Women", "Men", "Kids", "Shoes", "Electronics"];
-
-  // Use product store as source of truth so admin-added or seeded products appear
-  const products = useProductStore((s) => s.products);
-
   const categories = useMemo(() => {
     const set = new Set<string>();
-    products.forEach((p) => {
-      if (p.category && ALLOWED_CATEGORIES.includes(p.category)) set.add(p.category);
-    });
+    data?.forEach((p) => p.category && set.add(p.category));
     return Array.from(set);
-  }, [products]);
+  }, [data]);
 
   const filtered = useMemo(
-    () => filterProducts(products || [], search, category),
-    [products, search, category]
+    () => filterProducts(data || [], search, category),
+    [data, search, category]
   );
 
   return (

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .models import Product, CartItem, Order, OrderItem
 from .serializers import ProductSerializer, CartItemSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -28,7 +28,13 @@ class LoginSerializer(serializers.Serializer):
 
 
 def user_to_dict(user):
-    return {"id": str(user.id), "name": user.get_full_name() or user.username, "email": user.email}
+    return {
+        "id": str(user.id),
+        "name": user.get_full_name() or user.username,
+        "email": user.email,
+        "is_staff": bool(user.is_staff),
+        "role": "admin" if user.is_staff else "customer",
+    }
 
 
 class RegisterAPIView(APIView):
@@ -63,7 +69,11 @@ class RegisterAPIView(APIView):
 
         if return_token:
             refresh = RefreshToken.for_user(user)
-            return Response({"user": user_to_dict(user), "token": str(refresh.access_token)})
+            return Response({
+                "user": user_to_dict(user),
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            })
         return Response({"user": user_to_dict(user)})
 
 
@@ -78,14 +88,23 @@ class LoginAPIView(APIView):
         if not user:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         refresh = RefreshToken.for_user(user)
-        return Response({"user": user_to_dict(user), "token": str(refresh.access_token)})
+        return Response({
+            "user": user_to_dict(user),
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        })
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'id'
+
+    def get_permissions(self):
+        # Only admin users may create/update/delete products
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [IsAuthenticatedOrReadOnly()]
 
     def get_queryset(self):
         qs = Product.objects.filter(is_active=True)
@@ -113,7 +132,16 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        # Only admins may modify orders (update status, etc). Authenticated users may create/list their orders.
+        if self.action in ['partial_update', 'update', 'destroy']:
+            return [IsAdminUser()]
+        return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
+        # Admins can view all orders, normal users only their own
+        if self.request.user and self.request.user.is_staff:
+            return Order.objects.all().prefetch_related('items')
         return Order.objects.filter(user=self.request.user).prefetch_related('items')
 
     @action(detail=True, methods=['post'])

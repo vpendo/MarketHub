@@ -1,31 +1,42 @@
 import api from "./api";
 import type { User } from "../types/user";
 
-type AuthResponse = { user: User; token: string };
+type AuthResponse = { user: User; access: string; refresh: string };
 
-export const login = async (
-  email: string,
-  password: string
-): Promise<AuthResponse> => {
+export const login = async (email: string, password: string): Promise<User> => {
   const res = await api.post<AuthResponse>("login/", { email, password });
-  const { user, token } = res.data;
-  // persist token and set default header
+  const { access, refresh } = res.data;
   try {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    localStorage.setItem("token", token);
-    document.cookie = `token=${token}; path=/; samesite=Lax`;
-  } catch (e) {
-    /* ignore in non-browser env */
+    localStorage.setItem("access_token", access);
+    localStorage.setItem("refresh_token", refresh);
+    api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+  } catch (err) {
+    // ignore storage errors
   }
-  return { user, token };
+  return { ...res.data.user, token: access };
 };
 
 export const register = async (payload: {
   name: string;
   email: string;
   password: string;
-}): Promise<AuthResponse> => {
+}): Promise<User> => {
   const res = await api.post<AuthResponse>("register/", payload);
-  // Do NOT persist token automatically after registration — require explicit login
-  return res.data;
+  const { access, refresh } = res.data;
+  try {
+    localStorage.setItem("access_token", access);
+    localStorage.setItem("refresh_token", refresh);
+    api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+  } catch (err) {
+    // ignore storage errors
+  }
+  return { ...res.data.user, token: access };
+};
+
+export const logout = () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  try {
+    delete api.defaults.headers.common["Authorization"];
+  } catch (err) {}
 };

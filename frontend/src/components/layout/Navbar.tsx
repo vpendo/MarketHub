@@ -32,11 +32,6 @@ export default function Navbar() {
           Analytics
         </Link>
       )}
-      {user?.role === "admin" && (
-        <Link to="/admin" className="hover:text-primary">
-          Admin
-        </Link>
-      )}
     </>
   );
 
@@ -49,7 +44,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Primary" className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-200">
+        <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-200">
           <NavLinks />
           {user ? (
             <button
