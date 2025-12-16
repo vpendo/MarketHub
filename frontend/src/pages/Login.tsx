@@ -30,8 +30,9 @@ export default function Login() {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      const user = await loginApi(data.email, data.password);
-      setUser(user);
+      const { user, access, refresh } = await loginApi(data.email, data.password);
+      setUser({ ...user, token: access });
+      localStorage.setItem("refresh_token", refresh);
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);

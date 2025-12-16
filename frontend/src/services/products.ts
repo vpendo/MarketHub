@@ -1,31 +1,55 @@
 import api from "./api";
-import { mockProducts } from "../data/mockProducts";
 import type { Product } from "../types/product";
 
-// Fetch all products - uses mock data if API fails
-export const fetchProducts = async (): Promise<Product[]> => {
-  try {
-    const res = await api.get("/products/");
-    return res.data;
-  } catch (error) {
-    // If API fails, return mock data
-    console.log("Using mock product data");
-    return mockProducts;
-  }
+type ProductApi = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image_url?: string;
+  category?: string;
+  inventory?: number;
 };
 
-// Fetch single product - uses mock data if API fails
+export const mapProductFromApi = (p: ProductApi): Product => ({
+  id: p.id,
+  name: p.title,
+  description: p.description,
+  price: Number(p.price),
+  image: p.image_url,
+  category: p.category,
+  stock: p.inventory,
+});
+
+const mapToApi = (p: Partial<Product>): Partial<ProductApi> => ({
+  title: p.name,
+  description: p.description,
+  price: p.price,
+  image_url: p.image,
+  category: p.category,
+  inventory: p.stock,
+});
+
+export const fetchProducts = async (): Promise<Product[]> => {
+  const res = await api.get<ProductApi[]>("/products/");
+  return res.data.map(mapProductFromApi);
+};
+
 export const fetchProduct = async (id: string): Promise<Product> => {
-  try {
-    const res = await api.get(`/products/${id}/`);
-    return res.data;
-  } catch (error) {
-    // If API fails, return mock product
-    console.log("Using mock product data");
-    const product = mockProducts.find((p) => p.id === id);
-    if (product) {
-      return product;
-    }
-    throw new Error("Product not found");
-  }
+  const res = await api.get<ProductApi>(`/products/${id}/`);
+  return mapProductFromApi(res.data);
+};
+
+export const createProduct = async (payload: Product): Promise<Product> => {
+  const res = await api.post<ProductApi>("/products/", mapToApi(payload));
+  return mapProductFromApi(res.data);
+};
+
+export const updateProduct = async (id: string, payload: Partial<Product>): Promise<Product> => {
+  const res = await api.patch<ProductApi>(`/products/${id}/`, mapToApi(payload));
+  return mapProductFromApi(res.data);
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+  await api.delete(`/products/${id}/`);
 };

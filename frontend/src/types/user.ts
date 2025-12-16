@@ -4,4 +4,5 @@ export type User = {
   email: string;
   token?: string;
   role?: "admin" | "customer";
+  is_staff?: boolean;
 };

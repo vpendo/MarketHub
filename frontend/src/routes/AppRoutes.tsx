@@ -9,7 +9,6 @@ import Orders from "../pages/Orders";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import PrivateRoute from "./PrivateRoute";
-import AdminRoute from "./AdminRoute";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Comparison from "../pages/Comparison";
@@ -39,7 +38,7 @@ export default function AppRoutes() {
       <Route
         path="/analytics"
         element={
-          <PrivateRoute>
+          <PrivateRoute requireAdmin>
             <Analytics />
           </PrivateRoute>
         }
@@ -47,9 +46,9 @@ export default function AppRoutes() {
       <Route
         path="/admin/*"
         element={
-          <AdminRoute>
+          <PrivateRoute requireAdmin>
             <Admin />
-          </AdminRoute>
+          </PrivateRoute>
         }
       />
     </Routes>

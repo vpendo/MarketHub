@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
     # Third-party
     'rest_framework',
+    'drf_spectacular',
     'corsheaders',
 
     # Local
@@ -95,6 +96,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # Simple JWT
@@ -108,3 +110,11 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173').split(',')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# drf-spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MarketHub API',
+    'DESCRIPTION': 'E-commerce API for products, cart, and orders.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}

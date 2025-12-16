@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { useUserStore } from "../../store/userStore";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Edit, Trash2, Package, X } from "lucide-react";
-import { useProductStore } from "../../store/productStore";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import type { Product } from "../../types/product";
+import useFetch from "../../hooks/useFetch";
+import { fetchProducts, createProduct, updateProduct, deleteProduct } from "../../services/products";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "../../store/userStore";
 
 const productSchema = z.object({
   name: z.string().min(2, "Product name is required"),
@@ -22,17 +24,14 @@ type ProductForm = z.infer<typeof productSchema>;
 
 export default function ProductManagement() {
   const user = useUserStore((s) => s.user);
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="p-6">
-        <h2 className="text-xl font-semibold">Unauthorized</h2>
-        <p className="text-sm text-slate-600 mt-2">You do not have access to manage products.</p>
-      </div>
-    );
-  }
-  const { products, setProducts } = useProductStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    data: products = [],
+    isLoading,
+  } = useFetch<Product[]>(["products"], fetchProducts);
 
   const {
     register,
@@ -41,35 +40,37 @@ export default function ProductManagement() {
     formState: { errors },
   } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
-    defaultValues: editingProduct
-      ? {
-          name: editingProduct.name,
-          description: editingProduct.description || "",
-          price: editingProduct.price,
-          category: editingProduct.category || "",
-          stock: editingProduct.stock || 0,
-          image: editingProduct.image || "",
-        }
-      : undefined,
   });
 
-  const onSubmit = (data: ProductForm) => {
+  useEffect(() => {
     if (editingProduct) {
-      // Update existing product
-      const updated = products.map((p) =>
-        p.id === editingProduct.id
-          ? { ...p, ...data, id: editingProduct.id }
-          : p
-      );
-      setProducts(updated);
+      reset({
+        name: editingProduct.name,
+        description: editingProduct.description || "",
+        price: editingProduct.price,
+        category: editingProduct.category || "",
+        stock: editingProduct.stock || 0,
+        image: editingProduct.image || "",
+      });
     } else {
-      // Add new product
-      const newProduct: Product = {
-        ...data,
-        id: Date.now().toString(),
-      };
-      setProducts([...products, newProduct]);
+      reset({
+        name: "",
+        description: "",
+        price: 0,
+        category: "",
+        stock: 0,
+        image: "",
+      });
     }
+  }, [editingProduct, reset]);
+
+  const onSubmit = async (data: ProductForm) => {
+    if (editingProduct) {
+      await updateProduct(editingProduct.id, data);
+    } else {
+      await createProduct({ ...data, id: "" });
+    }
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
     reset();
     setIsModalOpen(false);
     setEditingProduct(null);
@@ -80,9 +81,10 @@ export default function ProductManagement() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((p) => p.id !== id));
+      await deleteProduct(id);
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
     }
   };
 
@@ -91,6 +93,16 @@ export default function ProductManagement() {
     setEditingProduct(null);
     reset();
   };
+
+  const isAdmin = !!(user?.role === "admin" || user?.is_staff);
+  if (!isAdmin) {
+    return (
+      <div className="p-6">
+        <h2 className="text-xl font-semibold">Unauthorized</h2>
+        <p className="text-sm text-slate-600 mt-2">You do not have access to manage products.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
@@ -104,7 +116,10 @@ export default function ProductManagement() {
           </p>
         </div>
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingProduct(null);
+            setIsModalOpen(true);
+          }}
           className="bg-primary text-white hover:bg-primary-600 flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -114,7 +129,9 @@ export default function ProductManagement() {
 
       {/* Products List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.length === 0 ? (
+        {isLoading ? (
+          <div className="col-span-full text-center py-12">Loading products...</div>
+        ) : products.length === 0 ? (
           <div className="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-xl border">
             <Package className="w-16 h-16 mx-auto text-slate-300 dark:text-slate-700 mb-4" />
             <p className="text-slate-600 dark:text-slate-400 mb-4">

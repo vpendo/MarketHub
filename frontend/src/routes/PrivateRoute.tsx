@@ -1,8 +1,18 @@
 import { Navigate } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
+import type { ReactNode } from "react";
 
-export default function PrivateRoute({ children }: { children: React.ReactNode }) {
+type Props = {
+  children: ReactNode;
+  requireAdmin?: boolean;
+};
+
+export default function PrivateRoute({ children, requireAdmin = false }: Props) {
   const user = useUserStore((s) => s.user);
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
+  const hasToken = !!user?.token;
+  const isAdmin = !!(user?.role === "admin" || user?.is_staff);
+
+  if (!user || !hasToken) return <Navigate to="/login" replace />;
+  if (requireAdmin && !isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
 }

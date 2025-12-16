@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { Product } from "../types/product";
-import { mockProducts } from "../data/mockProducts";
 
 type ProductState = {
   products: Product[];
@@ -10,7 +9,7 @@ type ProductState = {
 };
 
 export const useProductStore = create<ProductState>((set) => ({
-  products: mockProducts, // Initialize with mock data
+  products: [],
   selected: null,
   setProducts: (items) => set({ products: items }),
   selectProduct: (product) => set({ selected: product }),

@@ -51,8 +51,9 @@ export default function Register() {
 
   const onSubmit = async ({ name, email, password }: RegisterForm) => {
     try {
-      const user = await registerApi({ name, email, password });
-      setUser(user);
+      const { user, access, refresh } = await registerApi({ name, email, password });
+      setUser({ ...user, token: access });
+      localStorage.setItem("refresh_token", refresh);
       navigate("/");
     } catch (error) {
       console.error("Registration error:", error);

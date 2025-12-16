@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingCart } from "lucide-react";
+import { useEffect } from "react";
 import { useCartStore } from "../store/cartStore";
+import { useUserStore } from "../store/userStore";
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, total } = useCartStore();
+  const { items, removeItem, updateQuantity, total, loadCart } = useCartStore();
+  const user = useUserStore((s) => s.user);
+
+  useEffect(() => {
+    if (user?.token) {
+      loadCart();
+    }
+  }, [user?.token, loadCart]);
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
@@ -53,7 +62,7 @@ export default function Cart() {
                   <div className="flex items-center gap-2 border rounded-lg">
                     <button
                       onClick={() =>
-                        updateQuantity(item.product.id, Math.max(1, item.quantity - 1))
+                        updateQuantity(item.id || item.product.id, Math.max(1, item.quantity - 1), item.product.id)
                       }
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-l-lg"
                       aria-label="Decrease quantity"
@@ -64,7 +73,9 @@ export default function Cart() {
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                      onClick={() =>
+                        updateQuantity(item.id || item.product.id, item.quantity + 1, item.product.id)
+                      }
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-r-lg"
                       aria-label="Increase quantity"
                     >
@@ -72,7 +83,7 @@ export default function Cart() {
                     </button>
                   </div>
                   <button
-                    onClick={() => removeItem(item.product.id)}
+                    onClick={() => removeItem(item.id || item.product.id, item.product.id)}
                     className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
                     aria-label="Remove item"
                   >

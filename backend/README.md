@@ -2,49 +2,61 @@
 
 This backend provides a minimal Django + DRF API for the MarketHub frontend.
 
-Features implemented in this scaffold:
-- Django 4.2+
-- Django REST Framework viewsets for `Product`, `CartItem`, and `Order`
-- Simple JWT authentication endpoints
+Features implemented:
+- Django 5 + Django REST Framework
+- JWT auth via Simple JWT (`/api/auth/token/`, `/api/auth/refresh/`)
+- Viewsets for `Product`, `CartItem`, and `Order`
 - CORS headers support
 - PostgreSQL-ready configuration
 - Admin panel for managing products and orders
+- OpenAPI/Swagger + Redoc via drf-spectacular (`/api/schema/`, `/api/docs/`, `/api/redoc/`)
 
-## Quick start (local, without Docker)
+## Quick start (local)
 
-1. Create a Python virtualenv and install dependencies:
-
+1) Create a Python virtualenv and install dependencies:
 ```bash
 python -m venv .venv
-.venv\Scripts\activate  
-source venv/Scripts/activate
- # Windows
-# or
-source .venv/bin/activate # macOS / Linux
-
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-2. Configure environment variables (copy `.env.example` to `.env` and edit if needed).
+2) Configure environment variables (create `.env` based on the values in `settings.py` or docker-compose):
+```
+DJANGO_SECRET_KEY=change-me
+DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+POSTGRES_DB=markethub_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+```
 
-3. Run migrations and create a superuser:
-
+3) Run migrations and create a superuser:
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-4. Start the development server:
-
+4) Start the dev server:
 ```bash
-
+python manage.py runserver
 ```
 
-5. Access the API at `http://localhost:8000/api/` and admin at `http://localhost:8000/admin/`.
+5) Access:
+- API: `http://localhost:8000/api/`
+- Swagger UI: `http://localhost:8000/api/docs/`
+- Redoc: `http://localhost:8000/api/redoc/`
+- Admin: `http://localhost:8000/admin/`
 
-> Note: Docker/Docker Compose instructions have been removed from this repository per project preferences.
-> Use the local development instructions above to run the backend. If you later want a Docker setup I can re-add a multi-service compose file.
+## Docker (optional)
+
+From the repo root:
+```bash
+docker-compose up --build
+```
+This starts Postgres and the Django API on `http://localhost:8000`.
 
 ## Frontend integration
 
@@ -102,15 +114,7 @@ python manage.py runserver
 
 
 ## Next steps (suggested)
-
-- Add fuller permissions (admin-only product writes)
-- Add real payment integration for `Order.pay`
-- Add background tasks for inventory updates (Celery)
-- Add API docs (drf-yasg / drf-spectacular)
-
-***
-
-If you want, I can:
-- Create express scripts or GitHub Actions for CI/CD
-- Add `drf-spectacular` for OpenAPI/Swagger
-- Add seed management command to populate products for frontend testing
+- Add payment integration for `Order.pay`
+- Add background tasks for inventory/notifications (Celery)
+- Seed command to populate products for testing
+- Harden CORS/ALLOWED_HOSTS for production

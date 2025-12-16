@@ -153,16 +153,9 @@ See LICENSE file for details.
 
 ## 📧 Contact
 
-For questions: nexvetures@gmail.com
+For questions or support: **markethub250@gmail.com**
 
 ---
 
-**Note**: This project meets all internship requirements including:
-- ✅ All core features implemented
-- ✅ 3+ extra features (Wishlist, Comparison, Analytics)
-- ✅ Custom color palette with light/dark mode
-- ✅ WCAG 2.1 AA accessibility compliance
-- ✅ Full test coverage
-- ✅ Comprehensive documentation
-- ✅ Responsive design
-- ✅ Modern UI/UX
+**Current gaps / not implemented yet**
+- Extra features: Only wishlist, comparison, and analytics are present. Real-time inventory, AI recommendations, live tracking, and social integration are not implemented.

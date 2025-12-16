@@ -33,16 +33,34 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
+    product_id = serializers.UUIDField(write_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ('id', 'product', 'quantity', 'price')
+        fields = ('id', 'product', 'product_id', 'quantity', 'price')
+        read_only_fields = ('id',)
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+    items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
         fields = ('id', 'user', 'status', 'total', 'created_at', 'items')
-        read_only_fields = ('id', 'created_at', 'total')
+        read_only_fields = ('id', 'created_at', 'total', 'user')
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        user = self.context['request'].user
+        order = Order.objects.create(user=user, status=validated_data.get('status', 'pending'), total=0)
+        total = 0
+        for item in items_data:
+            product_id = item.get('product_id')
+            quantity = item.get('quantity', 1)
+            price = item.get('price', 0)
+            product = Product.objects.get(id=product_id)
+            OrderItem.objects.create(order=order, product=product, quantity=quantity, price=price)
+            total += price * quantity
+        order.total = total
+        order.save()
+        return order

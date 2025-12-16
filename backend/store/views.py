@@ -151,3 +151,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = 'processing'
         order.save()
         return Response({'status': 'processing'})
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

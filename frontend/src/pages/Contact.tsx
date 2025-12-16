@@ -35,8 +35,8 @@ export default function Contact() {
     {
       icon: <Mail className="w-6 h-6" />,
       label: "Email",
-      value: "support@markethub.com",
-      link: "mailto:support@markethub.com",
+      value: "markethub250@gmail.com",
+      link: "mailto:markethub250@gmail.com",
       color: "text-blue-600 dark:text-blue-400",
       bg: "bg-blue-50 dark:bg-blue-900/20",
     },
