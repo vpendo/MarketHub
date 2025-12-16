@@ -6,8 +6,8 @@ import { Eye, EyeOff, UserPlus, Check } from "lucide-react";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { register as registerApi } from "../services/auth";
-import { useUserStore } from "../store/userStore";
 import { useState } from "react";
+import Cookies from "js-cookie";
 
 const registerSchema = z
   .object({
@@ -30,8 +30,9 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const setUser = useUserStore((s) => s.setUser);
+
   const {
     register,
     handleSubmit,
@@ -50,20 +51,27 @@ export default function Register() {
   ];
 
   const onSubmit = async ({ name, email, password }: RegisterForm) => {
+    setServerError(null);
     try {
-      const { user, access, refresh } = await registerApi({ name, email, password });
-      setUser({ ...user, token: access });
-      localStorage.setItem("refresh_token", refresh);
-      navigate("/");
-    } catch (error) {
-      console.error("Registration error:", error);
+      // Send 'name' instead of 'username'
+      await registerApi({ name, email, password });
+
+      Cookies.set("user_email", email, { expires: 7 });
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Registration error:", error.response?.data || error.message);
+      const data = error.response?.data;
+
+      if (data?.email) setServerError(data.email[0]);
+      else if (data?.name) setServerError(data.name[0]);
+      else if (data?.password) setServerError(data.password[0]);
+      else setServerError("Registration failed. Please try again.");
     }
   };
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <div className="p-3 bg-gradient-to-r from-secondary to-green-500 rounded-xl">
@@ -76,125 +84,76 @@ export default function Register() {
           </p>
         </div>
 
-        {/* Register Form */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border shadow-lg">
+          {serverError && <p className="text-sm text-red-500 mb-4 text-center">{serverError}</p>}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Full Name */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Full Name
               </label>
               <Input {...register("name")} placeholder="John Doe" className="w-full" />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Email Address
               </label>
-              <Input
-                {...register("email")}
-                type="email"
-                placeholder="you@example.com"
-                className="w-full"
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+              <Input {...register("email")} type="email" placeholder="you@example.com" className="w-full" />
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
 
+            {/* Password */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Password
               </label>
               <div className="relative">
-                <Input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
-                  className="w-full pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
+                <Input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Create a strong password" className="w-full pr-10" />
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition" aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {password && (
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-2 text-xs ${
-                        req.met ? "text-green-600 dark:text-green-400" : "text-slate-500"
-                      }`}
-                    >
-                      <Check
-                        className={`w-4 h-4 ${req.met ? "text-green-600" : "text-slate-400"}`}
-                      />
+                    <div key={idx} className={`flex items-center gap-2 text-xs ${req.met ? "text-green-600 dark:text-green-400" : "text-slate-500"}`}>
+                      <Check className={`w-4 h-4 ${req.met ? "text-green-600" : "text-slate-400"}`} />
                       {req.text}
                     </div>
                   ))}
                 </div>
               )}
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
 
+            {/* Confirm Password */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Confirm Password
               </label>
               <div className="relative">
-                <Input
-                  {...register("confirmPassword")}
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  className="w-full pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition"
-                  aria-label={showConfirm ? "Hide password" : "Show password"}
-                >
+                <Input {...register("confirmPassword")} type={showConfirm ? "text" : "password"} placeholder="Confirm your password" className="w-full pr-10" />
+                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition" aria-label={showConfirm ? "Hide password" : "Show password"}>
                   {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-              )}
+              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>}
             </div>
 
+            {/* Terms */}
             <div className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
-                id="terms"
-                className="mt-1 rounded"
-                required
-              />
+              <input type="checkbox" id="terms" className="mt-1 rounded" required />
               <label htmlFor="terms" className="text-slate-600 dark:text-slate-300">
                 I agree to the{" "}
-                <Link to="#" className="text-primary hover:text-primary-600">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link to="#" className="text-primary hover:text-primary-600">
-                  Privacy Policy
-                </Link>
+                <Link to="#" className="text-primary hover:text-primary-600">Terms of Service</Link> and{" "}
+                <Link to="#" className="text-primary hover:text-primary-600">Privacy Policy</Link>
               </label>
             </div>
 
-            <Button
-              className="w-full bg-gradient-to-r from-secondary to-green-500 text-white hover:from-green-500 hover:to-green-600 shadow-lg"
-              type="submit"
-              disabled={isSubmitting}
-            >
+            <Button className="w-full bg-gradient-to-r from-secondary to-green-500 text-white hover:from-green-500 hover:to-green-600 shadow-lg" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
@@ -202,10 +161,7 @@ export default function Register() {
           <div className="mt-6 pt-6 border-t">
             <p className="text-center text-sm text-slate-600 dark:text-slate-300">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-primary font-semibold hover:text-primary-600 transition"
-              >
+              <Link to="/login" className="text-primary font-semibold hover:text-primary-600 transition">
                 Sign in
               </Link>
             </p>

@@ -20,6 +20,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const setUser = useUserStore((s) => s.setUser);
+
   const {
     register,
     handleSubmit,
@@ -31,11 +32,20 @@ export default function Login() {
   const onSubmit = async (data: LoginForm) => {
     try {
       const { user, access, refresh } = await loginApi(data.email, data.password);
+
+      // Save user to state and token to localStorage
       setUser({ ...user, token: access });
       localStorage.setItem("refresh_token", refresh);
-      navigate("/");
-    } catch (error) {
+
+      // Redirect based on role
+      if (user.is_staff) {
+        navigate("/admin/dashboard"); // Admin dashboard
+      } else {
+        navigate("/"); // Regular user homepage
+      }
+    } catch (error: any) {
       console.error("Login error:", error);
+      alert(error.response?.data?.detail || "Login failed. Please try again.");
     }
   };
 

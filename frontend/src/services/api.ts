@@ -5,6 +5,7 @@ const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 const api = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true, // ✅ send cookies / credentials
 });
 
 export const setAuthToken = (token?: string) => {
@@ -64,7 +65,11 @@ api.interceptors.response.use(
 
         isRefreshing = true;
         try {
-          const response = await axios.post(baseURL + "auth/refresh/", { refresh });
+          const response = await axios.post(
+            baseURL + "auth/refresh/",
+            { refresh },
+            { withCredentials: true } // ✅ send credentials for refresh
+          );
           const newAccess = response.data.access;
           localStorage.setItem("access_token", newAccess);
           api.defaults.headers.common["Authorization"] = "Bearer " + newAccess;
