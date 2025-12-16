@@ -43,15 +43,15 @@ export default function Contact() {
     {
       icon: <Phone className="w-6 h-6" />,
       label: "Phone",
-      value: "+25078203081",
-      link: "tel:+250782030814",
+      value: "+1 (555) 123-4567",
+      link: "tel:+15551234567",
       color: "text-green-600 dark:text-green-400",
       bg: "bg-green-50 dark:bg-green-900/20",
     },
     {
       icon: <MapPin className="w-6 h-6" />,
       label: "Address",
-      value: "123 Kigali, Rwanda",
+      value: "123 Commerce St, New York, NY 10001",
       link: "#",
       color: "text-orange-600 dark:text-orange-400",
       bg: "bg-orange-50 dark:bg-orange-900/20",
