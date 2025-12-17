@@ -104,7 +104,7 @@ POSTGRES_PORT=5432
 ```
 
 Ensure your `.env` values match your local Postgres instance. After updating `.env`, run:
-
+ '
 ```bash
 python manage.py makemigrations
 python manage.py migrate
