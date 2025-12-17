@@ -52,14 +52,17 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex-1 p-4 md:p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-          Admin Dashboard
-        </h1>
-        <p className="text-slate-600 dark:text-slate-300">
-          Manage products, orders, and inventory
-        </p>
+    <div className="flex-1 p-4 sm:p-6 space-y-6 overflow-auto">
+      {/* Dashboard Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <p className="text-slate-600 dark:text-slate-300">
+            Manage products, orders, and inventory
+          </p>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -72,23 +75,21 @@ export default function AdminDashboard() {
             <div className={`inline-flex p-3 rounded-lg ${stat.bg} ${stat.color} mb-3`}>
               {stat.icon}
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
-              {stat.label}
-            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">{stat.label}</p>
             <p className="text-2xl font-bold">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border shadow-sm overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
         {orders && orders.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-[500px]">
             {orders.slice(0, 5).map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 <div>
                   <p className="font-medium">Order #{order.id}</p>
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
                     {new Date(order.placedAt).toLocaleDateString()}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="mt-2 sm:mt-0 text-right">
                   <p className="font-semibold">${order.total.toFixed(2)}</p>
                   <span
                     className={`inline-block px-2 py-1 rounded text-xs ${
@@ -133,29 +134,18 @@ export default function AdminDashboard() {
             <h3 className="font-semibold mb-1 group-hover:text-primary transition">
               Manage Products
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Add, edit, or delete products
-            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Add, edit, or delete products</p>
           </Link>
           <button className="p-4 border-2 border-secondary/20 rounded-lg hover:bg-secondary/5 dark:hover:bg-secondary/10 transition text-left group">
-            <h3 className="font-semibold mb-1 group-hover:text-secondary transition">
-              Manage Inventory
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Update stock levels
-            </p>
+            <h3 className="font-semibold mb-1 group-hover:text-secondary transition">Manage Inventory</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Update stock levels</p>
           </button>
           <button className="p-4 border-2 border-accent/20 rounded-lg hover:bg-accent/5 dark:hover:bg-accent/10 transition text-left group">
-            <h3 className="font-semibold mb-1 group-hover:text-accent transition">
-              View Reports
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Sales and analytics
-            </p>
+            <h3 className="font-semibold mb-1 group-hover:text-accent transition">View Reports</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Sales and analytics</p>
           </button>
         </div>
       </div>
     </div>
   );
 }
-
