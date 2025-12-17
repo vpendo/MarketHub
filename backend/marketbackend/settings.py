@@ -1,15 +1,31 @@
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import AutoConfig
 
+# =========================
+# BASE DIRECTORY
+# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY
-SECRET_KEY = config('DJANGO_SECRET_KEY', default='dev-secret-key')
-DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='*').split(',')
+# =========================
+# Load .env file
+# =========================
+config = AutoConfig(search_path=BASE_DIR)
 
-# Application definition
+# =========================
+# SECURITY
+# =========================
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='replace-with-strong-secret-key')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config(
+    'DJANGO_ALLOWED_HOSTS',
+    default='markethub02.onrender.com',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+
+# =========================
+# APPLICATIONS
+# =========================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,19 +75,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'marketbackend.wsgi.application'
 
-# Database
+# =========================
+# DATABASE
+# =========================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DB', default='markethub_db'),
-        'USER': config('POSTGRES_USER', default='postgres'),
-        'PASSWORD': config('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': config('POSTGRES_HOST', default='localhost'),
+        'NAME': config('POSTGRES_DB', default='markethub_db_6k01'),
+        'USER': config('POSTGRES_USER', default='markethub_user'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default='BLE5ZxeBGz5RCMuMQj5RFJM8g7CtchN6'),
+        'HOST': config('POSTGRES_HOST', default='dpg-d51ir6vpm1nc73ai4fk0-a.oregon-postgres.render.com'),
         'PORT': config('POSTGRES_PORT', default='5432'),
     }
 }
 
-# Password validation
+# =========================
+# PASSWORD VALIDATION
+# =========================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -79,18 +99,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# =========================
+# INTERNATIONALIZATION
+# =========================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# =========================
+# STATIC FILES
+# =========================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # ✅ WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# REST Framework
+# =========================
+# REST FRAMEWORK
+# =========================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -101,23 +127,33 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# Simple JWT
+# =========================
+# SIMPLE JWT
+# =========================
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('SIMPLE_JWT_ACCESS_TOKEN_LIFETIME', default=60, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('SIMPLE_JWT_REFRESH_TOKEN_LIFETIME', default=1, cast=int)),
 }
 
+# =========================
 # CORS
+# =========================
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:5173,https://markethub250.netlify.app'
-).split(',')
-CORS_ALLOW_CREDENTIALS = True  # ✅ allow cookies and Authorization headers
+    default='https://markethub250.netlify.app',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+CORS_ALLOW_CREDENTIALS = True
 
+# =========================
+# DEFAULT AUTO FIELD
+# =========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# drf-spectacular
+# =========================
+# DRF SPECTACULAR
+# =========================
 SPECTACULAR_SETTINGS = {
     'TITLE': 'MarketHub API',
     'DESCRIPTION': 'E-commerce API for products, cart, and orders.',
