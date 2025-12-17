@@ -8,6 +8,7 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import OrderProduct from "../pages/OrderProduct"; // ✅ added
 import PrivateRoute from "./PrivateRoute";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
@@ -18,8 +19,35 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/catalog" element={<Catalog />} />
-      <Route path="/product/:id" element={<Product />} />
+
+      {/* Protected routes for logged-in customers */}
+      <Route
+        path="/catalog"
+        element={
+          <PrivateRoute>
+            <Catalog />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/product/:id"
+        element={
+          <PrivateRoute>
+            <Product />
+          </PrivateRoute>
+        }
+      />
+
+      {/* OrderProduct page route */}
+      <Route
+        path="/order/:productId"
+        element={
+          <PrivateRoute>
+            <OrderProduct />
+          </PrivateRoute>
+        }
+      />
+
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cart" element={<Cart />} />
@@ -27,6 +55,8 @@ export default function AppRoutes() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Protected routes */}
       <Route
         path="/orders"
         element={

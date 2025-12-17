@@ -1,93 +1,76 @@
-import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, GitCompare } from "lucide-react";
+import React from "react";
+import { ShoppingCart, Heart, Package } from "lucide-react";
 import Button from "./Button";
-import { useComparisonStore } from "../../store/comparisonStore";
 import type { Product } from "../../types/product";
+
+interface ProductCardProps {
+  product: Product;
+  onAdd: (product: Product) => void;
+  onWishlist: (product: Product) => void;
+  onOrder?: (product: Product) => void; // optional order handler
+  wished?: boolean;
+}
 
 export default function ProductCard({
   product,
   onAdd,
   onWishlist,
-  wished,
-}: {
-  product: Product;
-  onAdd?: (p: Product) => void;
-  onWishlist?: (p: Product) => void;
-  wished?: boolean;
-}) {
-  const { add: addToComparison, isComparing, remove: removeFromComparison } =
-    useComparisonStore();
-  const comparing = isComparing(product.id);
-
-  const handleCompare = () => {
-    if (comparing) {
-      removeFromComparison(product.id);
-    } else {
-      addToComparison(product);
-    }
-  };
-
+  onOrder,
+  wished = false,
+}: ProductCardProps) {
   return (
-    <article className="group border rounded-xl p-4 flex flex-col bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-all duration-300">
-      <Link to={`/product/${product.id}`} className="block mb-3">
-        <div className="aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800 mb-3">
-          <img
-            src={product.image || "/placeholder.png"}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-        <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition">
-          {product.name}
-        </h3>
-        {product.category && (
-          <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded text-xs mb-2">
-            {product.category}
-          </span>
-        )}
-        <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-3">
-          {product.description}
-        </p>
-        <p className="text-xl font-bold text-primary">
-          ${product.price.toFixed(2)}
-        </p>
-      </Link>
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4 flex flex-col">
+      {/* Product Image */}
+      <div className="aspect-square overflow-hidden rounded-lg mb-4 bg-slate-100 dark:bg-slate-800">
+        <img
+          src={product.image || "/placeholder.png"}
+          alt={product.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-      <div className="mt-auto space-y-2 pt-3 border-t">
-        <div className="flex gap-2">
+      <div className="flex-1 flex flex-col justify-between">
+        {/* Product Info */}
+        <div className="space-y-1">
+          {product.category && (
+            <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+              {product.category}
+            </span>
+          )}
+          <h3 className="text-lg font-medium">{product.name}</h3>
+          <p className="text-primary font-bold">${product.price.toFixed(2)}</p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-4 space-y-2">
           <Button
-            onClick={() => onAdd?.(product)}
-            className="flex-1 bg-primary text-white flex items-center justify-center gap-2 hover:bg-primary-600"
+            onClick={() => onAdd(product)}
+            className="w-full flex items-center justify-center gap-2 bg-primary text-white"
+            disabled={product.stock === 0}
           >
-            <ShoppingCart className="w-4 h-4" />
-            Add to Cart
+            <ShoppingCart className="w-4 h-4" /> Add to Cart
           </Button>
+
+          {onOrder && (
+            <Button
+              onClick={() => onOrder(product)}
+              className="w-full flex items-center justify-center gap-2 border border-primary text-primary hover:bg-primary/10"
+              disabled={product.stock === 0}
+            >
+              <Package className="w-4 h-4" /> Order Now
+            </Button>
+          )}
+
           <button
-            onClick={() => onWishlist?.(product)}
-            className={`p-2 rounded-lg border transition ${
-              wished
-                ? "border-primary text-primary bg-primary/10"
-                : "border-slate-300 dark:border-slate-700 hover:border-primary"
+            onClick={() => onWishlist(product)}
+            className={`w-full p-2 rounded-lg border text-center transition ${
+              wished ? "border-primary text-primary bg-primary/10" : "border-slate-300 dark:border-slate-700"
             }`}
-            aria-pressed={wished}
-            aria-label="Toggle wishlist"
           >
-            <Heart className={`w-5 h-5 ${wished ? "fill-current" : ""}`} />
+            <Heart className={`w-4 h-4 ${wished ? "fill-current" : ""}`} />
           </button>
         </div>
-        <button
-          onClick={handleCompare}
-          className={`w-full px-3 py-2 rounded-lg text-sm border transition flex items-center justify-center gap-2 ${
-            comparing
-              ? "bg-primary text-white border-primary"
-              : "border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
-          }`}
-          aria-pressed={comparing}
-        >
-          <GitCompare className="w-4 h-4" />
-          {comparing ? "Remove from Compare" : "Compare"}
-        </button>
       </div>
-    </article>
+    </div>
   );
 }

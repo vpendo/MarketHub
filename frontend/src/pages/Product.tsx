@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ShoppingCart, Heart, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Heart, ArrowLeft, Package } from "lucide-react"; // added Package icon
 import { fetchProduct } from "../services/products";
 import useFetch from "../hooks/useFetch";
 import { useCartStore } from "../store/cartStore";
@@ -19,6 +19,23 @@ export default function Product() {
     () => fetchProduct(id || ""),
     { enabled: Boolean(id) }
   );
+
+  // Function to handle direct ordering
+  const orderProduct = async () => {
+    if (!data) return;
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: data.id, quantity: 1 }),
+      });
+      if (!response.ok) throw new Error("Failed to place order");
+      alert("Order placed successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while placing the order.");
+    }
+  };
 
   if (isLoading)
     return (
@@ -113,6 +130,16 @@ export default function Product() {
                 <ShoppingCart className="w-5 h-5" />
                 Add to Cart
               </Button>
+
+              <Button
+                onClick={orderProduct}
+                className="flex-1 border border-primary text-primary flex items-center justify-center gap-2"
+                disabled={data.stock === 0}
+              >
+                <Package className="w-5 h-5" />
+                Order Now
+              </Button>
+
               <button
                 onClick={() => toggleWishlist(data)}
                 className={`p-3 rounded-lg border transition ${

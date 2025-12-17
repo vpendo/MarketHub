@@ -4,6 +4,7 @@ import Sidebar from "../../components/layout/Sidebar";
 import Topbar from "../../components/layout/Topbar";
 import AdminDashboard from "./AdminDashboard";
 import ProductManagement from "./ProductManagement";
+import AdminOrders from "./AdminOrders"; // <-- Import AdminOrders
 
 export default function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -26,10 +27,7 @@ export default function Admin() {
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="products" element={<ProductManagement />} />
-            <Route
-              path="orders"
-              element={<div className="p-6">Orders Management - Coming Soon</div>}
-            />
+            <Route path="orders" element={<AdminOrders />} /> {/* <-- Updated */}
             <Route
               path="inventory"
               element={<div className="p-6">Inventory Management - Coming Soon</div>}

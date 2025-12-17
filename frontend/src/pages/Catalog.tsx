@@ -1,6 +1,8 @@
+// Catalog.tsx
 import { useMemo, useState } from "react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { Search, Filter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ui/ProductCard";
 import { fetchProducts } from "../services/products";
 import { useCartStore } from "../store/cartStore";
@@ -17,6 +19,7 @@ export default function Catalog() {
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const { data, isLoading } = useFetch<Product[]>(["products"], fetchProducts, {
     onSuccess: setProducts,
@@ -32,6 +35,17 @@ export default function Catalog() {
     () => filterProducts(data || [], search, category),
     [data, search, category]
   );
+
+  // Updated: Navigate to OrderProduct page instead of placing order directly
+  const orderProduct = (product: Product) => {
+    const token = localStorage.getItem("access_token"); // check if user is logged in
+    if (!token) {
+      alert("You must be logged in to place an order");
+      return;
+    }
+
+    navigate(`/order/${product.id}`);
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
@@ -109,6 +123,7 @@ export default function Catalog() {
                 product={p}
                 onAdd={(prod) => addItem({ product: prod, quantity: 1 })}
                 onWishlist={toggleWishlist}
+                onOrder={orderProduct} // ✅ now navigates to OrderProduct page
                 wished={wished}
               />
             );

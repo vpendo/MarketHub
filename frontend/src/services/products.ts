@@ -11,16 +11,22 @@ type ProductApi = {
   inventory?: number;
 };
 
+/**
+ * Backend → Frontend
+ */
 export const mapProductFromApi = (p: ProductApi): Product => ({
   id: p.id,
   name: p.title,
   description: p.description,
   price: Number(p.price),
-  image: p.image_url,
-  category: p.category,
-  stock: p.inventory,
+  image: p.image_url ?? undefined,
+  category: p.category ?? undefined,
+  stock: p.inventory ?? 0, // ✅ prevent undefined
 });
 
+/**
+ * Frontend → Backend
+ */
 const mapToApi = (p: Partial<Product>): Partial<ProductApi> => ({
   title: p.name,
   description: p.description,
@@ -29,6 +35,8 @@ const mapToApi = (p: Partial<Product>): Partial<ProductApi> => ({
   category: p.category,
   inventory: p.stock,
 });
+
+/* ===================== API CALLS ===================== */
 
 export const fetchProducts = async (): Promise<Product[]> => {
   const res = await api.get<ProductApi[]>("/products/");
@@ -45,7 +53,10 @@ export const createProduct = async (payload: Product): Promise<Product> => {
   return mapProductFromApi(res.data);
 };
 
-export const updateProduct = async (id: string, payload: Partial<Product>): Promise<Product> => {
+export const updateProduct = async (
+  id: string,
+  payload: Partial<Product>
+): Promise<Product> => {
   const res = await api.patch<ProductApi>(`/products/${id}/`, mapToApi(payload));
   return mapProductFromApi(res.data);
 };

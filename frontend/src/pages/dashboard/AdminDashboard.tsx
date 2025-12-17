@@ -7,13 +7,13 @@ import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
   const products = useProductStore((s) => s.products);
-  const { data: orders } = useFetch<Order[]>(["orders"], fetchOrders);
+  const { data: orders = [] } = useFetch<Order[]>(["orders"], fetchOrders);
 
   const stats = {
     totalProducts: products.length,
-    totalOrders: orders?.length || 0,
+    totalOrders: orders.length,
     lowStock: products.filter((p) => (p.stock || 0) < 10).length,
-    totalRevenue: orders?.reduce((sum, o) => sum + o.total, 0) || 0,
+    totalRevenue: orders.reduce((sum, o) => sum + o.total, 0),
   };
 
   const statCards = [
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border shadow-sm overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
-        {orders && orders.length > 0 ? (
+        {orders.length > 0 ? (
           <div className="space-y-3 min-w-[500px]">
             {orders.slice(0, 5).map((order) => (
               <div
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="font-medium">Order #{order.id}</p>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {new Date(order.placedAt).toLocaleDateString()}
+                    {new Date(order.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="mt-2 sm:mt-0 text-right">
