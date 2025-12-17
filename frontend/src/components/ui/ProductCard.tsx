@@ -1,4 +1,4 @@
-import React from "react";
+
 import { ShoppingCart, Heart, Package } from "lucide-react";
 import Button from "./Button";
 import type { Product } from "../../types/product";
