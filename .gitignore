@@ -1,19 +1,34 @@
-# Node / frontend
+# =====================
+# Node / Frontend
+# =====================
 frontend/node_modules/
 frontend/dist/
+frontend/build/
 frontend/.env
 frontend/.env.*
+frontend/.pnp/
+frontend/.pnp.js
+frontend/.cache/
 
-# Python / backend
-backend/.venv/
+# =====================
+# Python / Backend
+# =====================
 backend/venv/
+backend/.venv/
 backend/__pycache__/
 backend/*.py[cod]
 backend/*.sqlite3
 backend/.env
 backend/.env.*
+backend/staticfiles/  
+# Django collected static files
 
-# IDEs and editors
+# Optional: ignore migrations if you prefer
+# backend/*/migrations/
+
+# =====================
+# IDEs / Editors
+# =====================
 .vscode/
 .idea/
 *.suo
@@ -21,31 +36,42 @@ backend/.env.*
 *.njsproj
 *.sln
 *.swp
-.DS_Store
 
+# =====================
 # OS files
+# =====================
+.DS_Store
 Thumbs.db
 
-# Logs
+# =====================
+# Logs / Coverage
+# =====================
 *.log
-
-# Coverage reports
 coverage/
 htmlcov/
 
-# Build artifacts
+# =====================
+# Build Artifacts
+# =====================
 dist/
 build/
+*.egg-info/
+*.egg
 
-# Mac & Linux
+# =====================
+# Temp / Swap / Backup
+# =====================
 *~
 
-# Lockfiles (if you want to ignore local package manager lockfiles, otherwise remove)
+# =====================
+# Lockfiles (optional)
+# =====================
 # pnpm-lock.yaml
+# package-lock.json
+# yarn.lock
 
-# Ignore sensitive files that may accidentally be added
+# =====================
+# Sensitive / Environment
+# =====================
 .env.local
 .env.production
-
-# Optional: ignore backend migrations if you prefer to keep them out of the repo
-# backend/*/migrations/
