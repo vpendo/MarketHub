@@ -1,229 +1,142 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, TrendingUp, Shield, Truck, Star, ArrowRight } from "lucide-react";
-import { mockProducts } from "../data/mockProducts";
+import { ShoppingBag, Shield, Truck, ArrowRight } from "lucide-react";
+
+// Product type
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category?: string;
+}
 
 export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Hero slides
+  const slides = [
+    { image: "/images/slide1.jpg", title: "Welcome to MarketHub", cta: "Shop Now" },
+    { image: "/images/slide2.jpg", title: "Style That Speaks", cta: "Browse Collection" },
+    { image: "/images/slide3.jpg", title: "Step Into Confidence", cta: "Explore Now" },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentSlide((prev) => (prev + 1) % slides.length), 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sample products for testing
+  const featuredProducts: Product[] = [
+    { id: "1", name: "Men's Jacket", price: 15.99, image: "/images/jackets.jpg" },
+    { id: "2", name: "Women's Dress", price: 20.99, image: "/images/dres1.jpg" },
+    { id: "3", name: "Sneakers", price: 10.9, image: "/images/snakers.jpg" },
+    { id: "4", name: "Computer", price: 300.99, image: "/images/hp.jpeg" },
+  ];
+
+  const newArrivals: Product[] = [
+    { id: "5", name: "Men's Shirt", price: 10.90, image: "/images/shirt.jpg" },
+    { id: "6", name: "Women's dress", price: 15.9, image: "/images/dress.jpg" },
+    { id: "7", name: "Jacket's men", price: 20.00, image: "/images/Jacket.jpg" },
+    { id: "8", name: "men's Shoes", price: 15.99, image: "/images/shoes.jpg" },
+  ];
+
+  // Features section
   const features = [
-    {
-      icon: <ShoppingBag className="w-8 h-8" />,
-      title: "Wide Selection",
-      desc: "Browse thousands of products across multiple categories",
-      color: "text-blue-600 dark:text-blue-400",
-      bg: "bg-blue-50 dark:bg-blue-900/20",
-      border: "border-blue-200 dark:border-blue-800",
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Secure Shopping",
-      desc: "Your data and payments are protected with industry-standard security",
-      color: "text-green-600 dark:text-green-400",
-      bg: "bg-green-50 dark:bg-green-900/20",
-      border: "border-green-200 dark:border-green-800",
-    },
-    {
-      icon: <Truck className="w-8 h-8" />,
-      title: "Fast Delivery",
-      desc: "Quick and reliable shipping to your doorstep",
-      color: "text-orange-600 dark:text-orange-400",
-      bg: "bg-orange-50 dark:bg-orange-900/20",
-      border: "border-orange-200 dark:border-orange-800",
-    },
-    {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: "Best Prices",
-      desc: "Competitive pricing with regular deals and discounts",
-      color: "text-purple-600 dark:text-purple-400",
-      bg: "bg-purple-50 dark:bg-purple-900/20",
-      border: "border-purple-200 dark:border-purple-800",
-    },
+    { icon: <ShoppingBag className="w-8 h-8 text-blue-600" />, title: "Wide Selection", desc: "Fashion, shoes & electronics" },
+    { icon: <Shield className="w-8 h-8 text-green-600" />, title: "Secure Shopping", desc: "Payments fully protected" },
+    { icon: <Truck className="w-8 h-8 text-purple-600" />, title: "Fast Delivery", desc: "Reliable shipping to your doorstep" },
   ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Happy Customer",
-      text: "MarketHub has transformed my shopping experience. Fast, reliable, and great prices!",
-      rating: 5,
-    },
-    {
-      name: "Michael Chen",
-      role: "Regular Buyer",
-      text: "The best e-commerce platform I've used. Excellent customer service and quality products.",
-      rating: 5,
-    },
-    {
-      name: "Emily Davis",
-      role: "Satisfied Shopper",
-      text: "Love the wishlist and comparison features. Makes shopping so much easier!",
-      rating: 5,
-    },
-  ];
-
-  const featured = mockProducts.slice(0, 4);
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary via-primary-600 to-secondary text-white py-16 md:py-24 px-6 rounded-2xl mb-16 overflow-hidden">
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+    <div className="max-w-7xl mx-auto px-6">
+
+      {/* Hero Slider */}
+      <section className="mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-blue-50 dark:bg-slate-900 rounded-2xl p-8 md:p-12">
+          {/* Text */}
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <ShoppingBag className="w-12 h-12" />
-              <h1 className="text-4xl md:text-6xl font-bold">
-                Welcome to MarketHub
-              </h1>
-            </div>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-2xl">
-              Your trusted marketplace for quality products at great prices. Shop smarter, faster, and better.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/catalog"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-blue-50 transition shadow-lg hover:shadow-xl"
-              >
-                Shop Now
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition"
-              >
-                Learn More
-              </Link>
-            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+              {slides[currentSlide].title}
+            </h1>
+            <Link
+              to="/catalog"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition"
+            >
+              {slides[currentSlide].cta}
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
-          <div className="hidden lg:block">
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl border border-white/20">
-              <img
-                src={featured[0].image}
-                alt={featured[0].name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white space-y-1">
-                <p className="text-sm uppercase tracking-[0.2em] text-blue-100">Featured</p>
-                <h3 className="text-xl font-semibold">{featured[0].name}</h3>
-                <p className="text-sm text-blue-100 line-clamp-2 max-w-md">
-                  {featured[0].description}
-                </p>
-              </div>
-            </div>
+
+          {/* Image */}
+          <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
+            <img src={slides[currentSlide].image} alt={slides[currentSlide].title} className="w-full h-full object-cover" />
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full -mr-48 -mt-48"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white opacity-10 rounded-full -ml-48 -mb-48"></div>
       </section>
 
-      {/* Featured Products with images */}
-      <section className="mb-16 px-6">
+      {/* Featured Products */}
+      <section className="mb-16">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-primary">Featured</p>
-            <h2 className="text-3xl font-bold">Handpicked for you</h2>
-          </div>
-          <Link to="/catalog" className="text-primary font-semibold hover:text-primary-600">
-            View all
-          </Link>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Featured Products</h2>
+          <Link to="/catalog" className="text-blue-600 font-semibold hover:text-blue-700">View all</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featured.map((p) => (
-            <Link
-              key={p.id}
-              to={`/product/${p.id}`}
-              className="group bg-white dark:bg-slate-900 rounded-xl border shadow-sm hover:shadow-lg transition overflow-hidden"
-            >
+          {featuredProducts.map((p) => (
+            <Link key={p.id} to={`/product/${p.id}`} className="group bg-white dark:bg-slate-900 rounded-xl border shadow-sm hover:shadow-lg overflow-hidden transition">
               <div className="aspect-square overflow-hidden">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                />
+                <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
               </div>
-              <div className="p-4 space-y-2">
-                {p.category && (
-                  <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded text-xs">
-                    {p.category}
-                  </span>
-                )}
+              <div className="p-4 space-y-2 text-center">
                 <h3 className="text-lg font-semibold line-clamp-1">{p.name}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
-                  {p.description}
-                </p>
-                <p className="text-xl font-bold text-primary">${p.price.toFixed(2)}</p>
+                <p className="text-xl font-bold text-blue-600">${p.price.toFixed(2)}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="mb-16 px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose MarketHub?</h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Experience the difference with our modern e-commerce platform designed for your convenience
-          </p>
+      {/* New Arrivals */}
+      <section className="mb-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">New Arrivals</h2>
+          <Link to="/catalog" className="text-blue-600 font-semibold hover:text-blue-700">View all</Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, idx) => (
-            <div
-              key={idx}
-              className={`p-6 border-2 ${feature.border} rounded-xl ${feature.bg} shadow-sm hover:shadow-lg transition group`}
-            >
-              <div className={`inline-flex p-3 rounded-lg ${feature.bg} ${feature.color} mb-4 group-hover:scale-110 transition`}>
-                {feature.icon}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {newArrivals.map((p) => (
+            <Link key={p.id} to={`/product/${p.id}`} className="group bg-white dark:bg-slate-900 rounded-xl border shadow-sm hover:shadow-lg overflow-hidden transition">
+              <div className="aspect-square overflow-hidden">
+                <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                {feature.desc}
-              </p>
-            </div>
+              <div className="p-4 space-y-2 text-center">
+                <h3 className="text-lg font-semibold line-clamp-1">{p.name}</h3>
+                <p className="text-xl font-bold text-blue-600">${p.price.toFixed(2)}</p>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="mb-16 px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
-            Join thousands of satisfied customers
-          </p>
-        </div>
+      {/* Features */}
+      <section className="mb-16">
+        <h2 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white text-center">Why Shop With Us?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-slate-900 rounded-xl p-6 border shadow-sm hover:shadow-md transition"
-            >
-              <div className="flex gap-1 mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 mb-4 italic">
-                "{testimonial.text}"
-              </p>
-              <div>
-                <p className="font-semibold">{testimonial.name}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{testimonial.role}</p>
-              </div>
+          {features.map((feature, idx) => (
+            <div key={idx} className="p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-lg transition text-center">
+              <div className="mb-4 flex justify-center">{feature.icon}</div>
+              <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">{feature.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{feature.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary to-secondary rounded-2xl p-12 md:p-16 text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-          Ready to Start Shopping?
-        </h2>
-        <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-          Explore our catalog and discover amazing products. Join thousands of satisfied customers.
-        </p>
+      <section className="bg-blue-600 dark:bg-blue-700 rounded-2xl p-12 md:p-16 text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Ready to Shop Now?</h2>
         <Link
           to="/catalog"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-blue-50 transition shadow-lg"
+          className="inline-flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-lg transition"
         >
           Browse Products
           <ArrowRight className="w-5 h-5" />
