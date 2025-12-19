@@ -8,12 +8,13 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import OrderProduct from "../pages/OrderProduct"; // ✅ added
+import OrderProduct from "../pages/OrderProduct"; 
 import PrivateRoute from "./PrivateRoute";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Comparison from "../pages/Comparison";
 import Analytics from "../pages/dashboard/Analytics";
+import Wishlist from "../pages/Wishlist"; // ✅ added
 
 export default function AppRoutes() {
   return (
@@ -37,8 +38,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* OrderProduct page route */}
       <Route
         path="/order/:productId"
         element={
@@ -55,6 +54,16 @@ export default function AppRoutes() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Wishlist page */}
+      <Route
+        path="/wishlist"
+        element={
+          <PrivateRoute>
+            <Wishlist />
+          </PrivateRoute>
+        }
+      />
 
       {/* Protected routes */}
       <Route

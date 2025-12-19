@@ -1,4 +1,3 @@
-
 import { ShoppingCart, Heart, Package } from "lucide-react";
 import Button from "./Button";
 import type { Product } from "../../types/product";
@@ -8,7 +7,9 @@ interface ProductCardProps {
   onAdd: (product: Product) => void;
   onWishlist: (product: Product) => void;
   onOrder?: (product: Product) => void; // optional order handler
+  onCompare?: () => void;              // ✅ add onCompare
   wished?: boolean;
+  comparing?: boolean;                  // ✅ add comparing
 }
 
 export default function ProductCard({
@@ -16,7 +17,9 @@ export default function ProductCard({
   onAdd,
   onWishlist,
   onOrder,
+  onCompare,
   wished = false,
+  comparing = false,
 }: ProductCardProps) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4 flex flex-col">
@@ -69,6 +72,17 @@ export default function ProductCard({
           >
             <Heart className={`w-4 h-4 ${wished ? "fill-current" : ""}`} />
           </button>
+
+          {onCompare && (
+            <button
+              onClick={onCompare}
+              className={`w-full p-2 rounded-lg border text-center transition ${
+                comparing ? "bg-primary text-white border-primary" : "border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+              }`}
+            >
+              {comparing ? "Remove Compare" : "Compare"}
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ShoppingCart, Heart, ArrowLeft, Package } from "lucide-react"; // added Package icon
+import { ShoppingCart, Heart, ArrowLeft, Package } from "lucide-react";
 import { fetchProduct } from "../services/products";
 import useFetch from "../hooks/useFetch";
 import { useCartStore } from "../store/cartStore";
@@ -20,7 +20,6 @@ export default function Product() {
     { enabled: Boolean(id) }
   );
 
-  // Function to handle direct ordering
   const orderProduct = async () => {
     if (!data) return;
     try {
@@ -43,6 +42,7 @@ export default function Product() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
+
   if (!data)
     return (
       <div className="max-w-4xl mx-auto p-6 text-center">
@@ -153,6 +153,7 @@ export default function Product() {
                 <Heart className={`w-5 h-5 ${wished ? "fill-current" : ""}`} />
               </button>
             </div>
+
             <button
               onClick={() =>
                 comparing ? removeFromComparison(data.id) : addToComparison(data)

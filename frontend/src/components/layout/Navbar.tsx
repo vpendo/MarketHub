@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Sun, Moon, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Menu, X, Sun, Moon, ShoppingBag, ShoppingCart, Heart } from "lucide-react";
 import useDarkMode from "../../hooks/useDarkMode";
 import { useUserStore } from "../../store/userStore";
 import { useCartStore } from "../../store/cartStore";
+import { useWishlistStore } from "../../store/wishlistStore";
 
 export default function Navbar() {
   const { theme, toggle } = useDarkMode();
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
   const cartItems = useCartStore((s) => s.items);
+  const wishlistItems = useWishlistStore((s) => s.items);
   const [open, setOpen] = useState(false);
 
   const NavLinks = () => (
@@ -33,6 +35,17 @@ export default function Navbar() {
     </Link>
   );
 
+  const WishlistLink = () => (
+    <Link to="/wishlist" className="relative hover:text-primary">
+      <Heart size={22} />
+      {wishlistItems.length > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+          {wishlistItems.length}
+        </span>
+      )}
+    </Link>
+  );
+
   return (
     <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-100 dark:border-slate-800 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -45,6 +58,7 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-200">
           <NavLinks />
           <CartLink />
+          <WishlistLink />
           {user ? (
             <button
               onClick={logout}
@@ -85,6 +99,7 @@ export default function Navbar() {
           <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
             <NavLinks />
             <CartLink />
+            <WishlistLink />
             {user ? (
               <button
                 onClick={() => {

@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ui/ProductCard";
 import { fetchProducts } from "../services/products";
 import { useCartStore } from "../store/cartStore";
+import { useWishlistStore } from "../store/wishlistStore";
+import { useComparisonStore } from "../store/comparisonStore";
 import useFetch from "../hooks/useFetch";
 import { useProductStore } from "../store/productStore";
-import { useWishlistStore } from "../store/wishlistStore";
 import { filterProducts } from "../utils/filterProducts";
 import type { Product } from "../types/product";
 
@@ -17,6 +18,7 @@ export default function Catalog() {
   const setProducts = useProductStore((s) => s.setProducts);
   const wishlist = useWishlistStore((s) => s.items);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
+  const { add: addToComparison, remove: removeFromComparison, isComparing } = useComparisonStore();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -36,14 +38,12 @@ export default function Catalog() {
     [data, search, category]
   );
 
-  // Updated: Navigate to OrderProduct page instead of placing order directly
   const orderProduct = (product: Product) => {
-    const token = localStorage.getItem("access_token"); // check if user is logged in
+    const token = localStorage.getItem("access_token");
     if (!token) {
       alert("You must be logged in to place an order");
       return;
     }
-
     navigate(`/order/${product.id}`);
   };
 
@@ -117,14 +117,19 @@ export default function Catalog() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((p) => {
             const wished = wishlist.some((w) => w.id === p.id);
+            const comparing = isComparing(p.id);
             return (
               <ProductCard
                 key={p.id}
                 product={p}
                 onAdd={(prod) => addItem({ product: prod, quantity: 1 })}
                 onWishlist={toggleWishlist}
-                onOrder={orderProduct} // ✅ now navigates to OrderProduct page
+                onOrder={orderProduct}
+                onCompare={() =>
+                  comparing ? removeFromComparison(p.id) : addToComparison(p)
+                }
                 wished={wished}
+                comparing={comparing}
               />
             );
           })}
