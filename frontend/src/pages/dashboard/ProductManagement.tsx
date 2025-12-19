@@ -81,10 +81,21 @@ export default function ProductManagement() {
     setIsModalOpen(true);
   };
 
+  // Updated delete function
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      await deleteProduct(id);
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      // Get token from localStorage (adjust if your auth store differs)
+      const token = localStorage.getItem("accessToken");
+
+      await deleteProduct(id, token || undefined);
       await queryClient.invalidateQueries({ queryKey: ["products"] });
+
+      alert("Product deleted successfully");
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      alert(err?.message || "Failed to delete product");
     }
   };
 
@@ -301,4 +312,3 @@ export default function ProductManagement() {
     </div>
   );
 }
-
