@@ -15,21 +15,42 @@ const mapCartItemFromApi = (item: CartItemApi): CartItem => ({
 });
 
 export const fetchCart = async (): Promise<CartItem[]> => {
-  const res = await api.get<CartItemApi[]>("cart/");
-  return res.data.map(mapCartItemFromApi);
+  try {
+    const res = await api.get<CartItemApi[]>("cart/");
+    return res.data.map(mapCartItemFromApi);
+  } catch (err) {
+    console.error("Failed to fetch cart:", err);
+    return [];
+  }
 };
 
 export const addToCart = async (productId: string, quantity = 1): Promise<CartItem[]> => {
-  await api.post("cart/", { product_id: productId, quantity });
-  return fetchCart();
+  try {
+    // ✅ Ensure we only send product_id and quantity
+    await api.post("cart/", { product_id: productId, quantity });
+    return fetchCart();
+  } catch (err: any) {
+    console.error("Failed to add to cart:", err.response?.data || err.message);
+    throw err;
+  }
 };
 
 export const updateCartItem = async (cartItemId: string, quantity: number): Promise<CartItem[]> => {
-  await api.patch(`cart/${cartItemId}/`, { quantity });
-  return fetchCart();
+  try {
+    await api.patch(`cart/${cartItemId}/`, { quantity });
+    return fetchCart();
+  } catch (err: any) {
+    console.error("Failed to update cart item:", err.response?.data || err.message);
+    throw err;
+  }
 };
 
 export const removeCartItem = async (cartItemId: string): Promise<CartItem[]> => {
-  await api.delete(`cart/${cartItemId}/`);
-  return fetchCart();
+  try {
+    await api.delete(`cart/${cartItemId}/`);
+    return fetchCart();
+  } catch (err: any) {
+    console.error("Failed to remove cart item:", err.response?.data || err.message);
+    throw err;
+  }
 };

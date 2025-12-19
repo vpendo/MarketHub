@@ -17,52 +17,76 @@ type CartState = {
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   setItems: (items) => set({ items }),
+
   loadCart: async () => {
     const user = useUserStore.getState().user;
     if (!user?.token) return;
-    const items = await fetchCart();
-    set({ items });
-  },
-  addItem: async (item) => {
-    const user = useUserStore.getState().user;
-    if (user?.token) {
-      await addToCart(item.product.id, item.quantity);
+    try {
       const items = await fetchCart();
       set({ items });
+    } catch (err) {
+      console.error("Failed to load cart:", err);
+    }
+  },
+
+  addItem: async (item) => {
+    const user = useUserStore.getState().user;
+    const quantity = item.quantity || 1;
+
+    if (user?.token) {
+      try {
+        // ✅ Ensure API receives product_id and quantity
+        await addToCart(item.product.id, quantity);
+        const items = await fetchCart();
+        set({ items });
+      } catch (err) {
+        console.error("Failed to add item to cart:", err);
+      }
     } else {
+      // Guest users: update local state
       set((state) => {
         const existing = state.items.find((i) => i.product.id === item.product.id);
         if (existing) {
           return {
             items: state.items.map((i) =>
               i.product.id === item.product.id
-                ? { ...i, quantity: i.quantity + item.quantity }
+                ? { ...i, quantity: i.quantity + quantity }
                 : i
             ),
           };
         }
-        return { items: [...state.items, item] };
+        return { items: [...state.items, { ...item, quantity }] };
       });
     }
   },
+
   removeItem: async (cartItemId, productId) => {
     const user = useUserStore.getState().user;
     if (user?.token) {
-      await removeCartItem(cartItemId);
-      const items = await fetchCart();
-      set({ items });
+      try {
+        await removeCartItem(cartItemId);
+        const items = await fetchCart();
+        set({ items });
+      } catch (err) {
+        console.error("Failed to remove item from cart:", err);
+      }
     } else {
       set((state) => ({
         items: state.items.filter((i) => i.product.id !== (productId || cartItemId)),
       }));
     }
   },
+
   updateQuantity: async (cartItemId, quantity, productId) => {
     const user = useUserStore.getState().user;
     if (user?.token) {
-      await updateCartItem(cartItemId, quantity);
-      const items = await fetchCart();
-      set({ items });
+      try {
+        await updateCartItem(cartItemId, quantity);
+        const items = await fetchCart();
+        set({ items });
+      } catch (err) {
+        console.error("Failed to update cart item quantity:", err);
+      }
     } else {
       set((state) => ({
         items: state.items.map((i) =>
@@ -71,7 +95,9 @@ export const useCartStore = create<CartState>((set, get) => ({
       }));
     }
   },
+
   clear: () => set({ items: [] }),
+
   total: () =>
     get().items.reduce(
       (sum, item) => sum + item.product.price * item.quantity,

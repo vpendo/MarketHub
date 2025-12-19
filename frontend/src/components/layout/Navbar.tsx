@@ -1,38 +1,36 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Sun, Moon, ShoppingBag } from "lucide-react";
+import { Menu, X, Sun, Moon, ShoppingBag, ShoppingCart } from "lucide-react";
 import useDarkMode from "../../hooks/useDarkMode";
 import { useUserStore } from "../../store/userStore";
+import { useCartStore } from "../../store/cartStore";
 
 export default function Navbar() {
   const { theme, toggle } = useDarkMode();
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
+  const cartItems = useCartStore((s) => s.items);
   const [open, setOpen] = useState(false);
 
   const NavLinks = () => (
     <>
-      <Link to="/" className="hover:text-primary">
-        Home
-      </Link>
-      <Link to="/about" className="hover:text-primary">
-        About
-      </Link>
-      <Link to="/contact" className="hover:text-primary">
-        Contact
-      </Link>
-      <Link to="/catalog" className="hover:text-primary">
-        Products
-      </Link>
-      <Link to="/comparison" className="hover:text-primary">
-        Compare
-      </Link>
-      {user && (
-        <Link to="/analytics" className="hover:text-primary">
-          Analytics
-        </Link>
-      )}
+      <Link to="/" className="hover:text-primary">Home</Link>
+      <Link to="/about" className="hover:text-primary">About</Link>
+      <Link to="/contact" className="hover:text-primary">Contact</Link>
+      <Link to="/catalog" className="hover:text-primary">Products</Link>
+      <Link to="/comparison" className="hover:text-primary">Compare</Link>
     </>
+  );
+
+  const CartLink = () => (
+    <Link to="/cart" className="relative hover:text-primary">
+      <ShoppingCart size={22} />
+      {cartItems.length > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+          {cartItems.length}
+        </span>
+      )}
+    </Link>
   );
 
   return (
@@ -46,6 +44,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-200">
           <NavLinks />
+          <CartLink />
           {user ? (
             <button
               onClick={logout}
@@ -85,6 +84,7 @@ export default function Navbar() {
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
             <NavLinks />
+            <CartLink />
             {user ? (
               <button
                 onClick={() => {

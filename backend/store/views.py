@@ -28,10 +28,10 @@ from .serializers import (
 
 User = get_user_model()
 
+
 # =====================================================
 # AUTH SERIALIZERS
 # =====================================================
-
 class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(min_length=2)
     email = serializers.EmailField()
@@ -47,7 +47,6 @@ class LoginSerializer(serializers.Serializer):
 # =====================================================
 # HELPERS
 # =====================================================
-
 def user_to_dict(user):
     return {
         "id": str(user.id),
@@ -61,7 +60,6 @@ def user_to_dict(user):
 # =====================================================
 # AUTH APIS
 # =====================================================
-
 class RegisterAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -163,7 +161,6 @@ class LoginAPIView(APIView):
 # =====================================================
 # PRODUCT API (ADMIN SAFE DELETE)
 # =====================================================
-
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     lookup_field = "id"
@@ -186,7 +183,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return qs
 
-    # ✅ SOFT DELETE (FIXES YOUR DELETE BUTTON)
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
         product.is_active = False
@@ -197,7 +193,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 # =====================================================
 # CART API
 # =====================================================
-
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
@@ -208,13 +203,16 @@ class CartItemViewSet(viewsets.ModelViewSet):
         ).select_related("product")
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Pass request in context to handle user properly
+        serializer.save(user=self.request.user, context={'request': self.request})
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 # =====================================================
 # ORDER API
 # =====================================================
-
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
@@ -239,4 +237,4 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({"status": "processing"})
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, context={'request': self.request})
