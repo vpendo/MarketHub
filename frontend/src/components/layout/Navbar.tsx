@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Sun, Moon, ShoppingBag, ShoppingCart, Heart } from "lucide-react";
 import useDarkMode from "../../hooks/useDarkMode";
 import { useUserStore } from "../../store/userStore";
@@ -13,6 +13,15 @@ export default function Navbar() {
   const cartItems = useCartStore((s) => s.items);
   const wishlistItems = useWishlistStore((s) => s.items);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const requireLogin = (path: string) => {
+    if (!user) {
+      navigate("/login");
+    } else {
+      navigate(path);
+    }
+  };
 
   const NavLinks = () => (
     <>
@@ -20,30 +29,41 @@ export default function Navbar() {
       <Link to="/about" className="hover:text-primary">About</Link>
       <Link to="/contact" className="hover:text-primary">Contact</Link>
       <Link to="/catalog" className="hover:text-primary">Products</Link>
-      <Link to="/comparison" className="hover:text-primary">Compare</Link>
+      <button
+        onClick={() => requireLogin("/comparison")}
+        className="hover:text-primary"
+      >
+        Compare
+      </button>
     </>
   );
 
   const CartLink = () => (
-    <Link to="/cart" className="relative hover:text-primary">
+    <button
+      onClick={() => requireLogin("/cart")}
+      className="relative hover:text-primary"
+    >
       <ShoppingCart size={22} />
       {cartItems.length > 0 && (
         <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
           {cartItems.length}
         </span>
       )}
-    </Link>
+    </button>
   );
 
   const WishlistLink = () => (
-    <Link to="/wishlist" className="relative hover:text-primary">
+    <button
+      onClick={() => requireLogin("/wishlist")}
+      className="relative hover:text-primary"
+    >
       <Heart size={22} />
       {wishlistItems.length > 0 && (
         <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
           {wishlistItems.length}
         </span>
       )}
-    </Link>
+    </button>
   );
 
   return (
