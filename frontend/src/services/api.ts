@@ -1,16 +1,13 @@
 import axios from "axios";
 
-// ✅ Backend URL for production (Render)
-const baseURL = import.meta.env.VITE_API_URL || "https://markethub02.onrender.com/api/";
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 
-// Create axios instance
 const api = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true, // ✅ send cookies / credentials
 });
 
-// Set or remove Authorization header
 export const setAuthToken = (token?: string) => {
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -34,7 +31,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Refresh token logic for 401 responses
+// Refresh logic for 401 responses
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
 
@@ -51,11 +48,9 @@ api.interceptors.response.use(
   async (err) => {
     const error = err;
     const originalRequest = error.config;
-
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refresh = localStorage.getItem("refresh_token");
-
       if (refresh) {
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
@@ -71,18 +66,15 @@ api.interceptors.response.use(
         isRefreshing = true;
         try {
           const response = await axios.post(
-            baseURL + "auth/refresh/", // Make sure backend endpoint matches
+            baseURL + "auth/refresh/",
             { refresh },
-            { withCredentials: true }
+            { withCredentials: true } // ✅ send credentials for refresh
           );
-
           const newAccess = response.data.access;
           localStorage.setItem("access_token", newAccess);
           api.defaults.headers.common["Authorization"] = "Bearer " + newAccess;
-
           processQueue(null, newAccess);
           originalRequest.headers["Authorization"] = "Bearer " + newAccess;
-
           return api(originalRequest);
         } catch (refreshErr) {
           processQueue(refreshErr, null);
@@ -94,7 +86,6 @@ api.interceptors.response.use(
         }
       }
     }
-
     return Promise.reject(error);
   }
 );
