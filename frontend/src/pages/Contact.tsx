@@ -22,13 +22,13 @@ export default function Contact() {
   const onSubmit = async (data: ContactForm) => {
     console.log("Contact form submitted:", data);
     reset();
-    alert("Thank you for your message! We'll get back to you soon.");
+    alert("Thank you! We'll get back to you soon.");
   };
 
   const contactInfo = [
     { icon: <Mail className="w-6 h-6 text-blue-600" />, label: "Email", value: "markethub250@gmail.com", link: "mailto:markethub250@gmail.com" },
-    { icon: <Phone className="w-6 h-6 text-green-600" />, label: "Phone", value: "+25(07820230814)", link: "tel:+2507820230814" },
-    { icon: <MapPin className="w-6 h-6 text-orange-600" />, label: "Address", value: "123 Kigali, ", link: "#" },
+    { icon: <Phone className="w-6 h-6 text-green-600" />, label: "Phone", value: "+25 782 023 0814", link: "tel:+2507820230814" },
+    { icon: <MapPin className="w-6 h-6 text-orange-600" />, label: "Address", value: "123 Kigali, Rwanda", link: "#" },
   ];
 
   return (
