@@ -33,65 +33,40 @@ export default function About() {
     },
   ];
 
-  const stats = [
-    { label: "Happy Customers", value: "10K+" },
-    { label: "Products", value: "5K+" },
-    { label: "Orders Delivered", value: "50K+" },
-    { label: "Countries", value: "100+" },
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary via-primary-600 to-secondary text-white py-20 px-6 rounded-2xl mb-12 overflow-hidden">
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+    <div className="max-w-7xl mx-auto px-6">
+
+      {/* Hero Section with Image */}
+      <section className="relative bg-gradient-to-r from-blue-600 to-green-500 text-white py-20 px-6 rounded-2xl mb-12 overflow-hidden grid md:grid-cols-2 items-center gap-8">
+        {/* Text */}
+        <div className="text-center md:text-left">
           <div className="inline-flex items-center justify-center mb-6">
             <ShoppingBag className="w-12 h-12 mr-3" />
             <h1 className="text-4xl md:text-5xl font-bold">About MarketHub</h1>
           </div>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100">
+          <p className="text-xl md:text-2xl mb-8">
             Your trusted marketplace for quality products at great prices
           </p>
         </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full -mr-48 -mt-48"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white opacity-10 rounded-full -ml-48 -mb-48"></div>
+
+        {/* Image */}
+        <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
+          <img
+            src="/images/about.jpeg" // place your image in public/images/
+            alt="About MarketHub"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </section>
 
       {/* Mission Section */}
       <section className="mb-12 px-6">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 border shadow-sm">
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-              MarketHub is a modern e-commerce platform focused on speed, accessibility, and trust.
-              We combine a curated catalog with smooth checkout and order tracking to make online
-              shopping effortless.
-            </p>
-            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-              Our mission is to make online shopping effortless with inclusive design, secure payments,
-              and responsive experiences across all devices. We believe everyone deserves access to
-              quality products at fair prices.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="mb-12 px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-slate-900 rounded-xl p-6 border shadow-sm text-center hover:shadow-md transition"
-            >
-              <p className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.value}
-              </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {stat.label}
-              </p>
-            </div>
-          ))}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 border shadow-sm text-center">
+          <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
+          <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+            MarketHub is a modern e-commerce platform focused on accessibility, trust, and speed.
+            We make online shopping effortless with secure payments, curated products, and smooth checkout.
+          </p>
         </div>
       </section>
 
@@ -102,38 +77,37 @@ export default function About() {
           {values.map((value, idx) => (
             <div
               key={idx}
-              className={`p-6 border-2 rounded-xl ${value.bg} shadow-sm hover:shadow-md transition`}
+              className={`p-6 border-2 rounded-xl ${value.bg} shadow-sm hover:shadow-md transition text-center`}
             >
-              <div className={`inline-flex p-3 rounded-lg ${value.bg} ${value.color} mb-4`}>
+              <div className={`inline-flex p-3 rounded-lg mb-4 ${value.color} bg-white/10`}>
                 {value.icon}
               </div>
               <h3 className="text-lg font-semibold mb-2">{value.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                {value.desc}
-              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{value.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 md:p-12 text-center mb-12">
+      <section className="bg-gradient-to-r from-blue-600 to-green-500 rounded-2xl p-8 md:p-12 text-center mb-12">
         <div className="max-w-2xl mx-auto text-white">
           <Heart className="w-12 h-12 mx-auto mb-4" />
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
             Join the MarketHub Community
           </h2>
-          <p className="text-lg mb-6 text-blue-100">
-            Experience the future of online shopping. Start browsing our catalog today!
+          <p className="text-lg mb-6">
+            Start exploring our catalog today and enjoy fast, reliable shopping.
           </p>
           <Link
             to="/catalog"
-            className="inline-block px-8 py-3 bg-white text-primary rounded-lg font-semibold hover:bg-blue-50 transition shadow-lg"
+            className="inline-block px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition shadow-lg"
           >
             Start Shopping
           </Link>
         </div>
       </section>
+
     </div>
   );
 }
