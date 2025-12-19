@@ -22,7 +22,7 @@ export const login = async (
   password: string
 ): Promise<AuthResponse> => {
   const res = await api.post<AuthResponse>(
-    "login/",
+    "auth/login/", // <-- fixed endpoint path
     { email, password },
     {
       headers: { "Content-Type": "application/json" },
@@ -34,6 +34,10 @@ export const login = async (
     ...res.data.user,
     role: res.data.user.is_staff ? "admin" : "customer",
   };
+
+  // Store tokens
+  localStorage.setItem("access_token", res.data.access);
+  localStorage.setItem("refresh_token", res.data.refresh);
 
   return { ...res.data, user };
 };
@@ -47,7 +51,7 @@ export const register = async (payload: {
   password: string;
 }): Promise<AuthResponse> => {
   const res = await api.post<AuthResponse>(
-    "register/",
+    "auth/register/", // <-- fixed endpoint path
     payload,
     {
       headers: { "Content-Type": "application/json" },
@@ -59,6 +63,10 @@ export const register = async (payload: {
     ...res.data.user,
     role: res.data.user.is_staff ? "admin" : "customer",
   };
+
+  // Store tokens
+  localStorage.setItem("access_token", res.data.access);
+  localStorage.setItem("refresh_token", res.data.refresh);
 
   return { ...res.data, user };
 };
