@@ -5,56 +5,115 @@ import type { Order } from "../../types/order";
 import { fetchOrders } from "../../services/orders";
 
 export default function AdminOrders() {
-  const { data: orders = [], isLoading, refetch } = useFetch<Order[]>(["orders"], fetchOrders);
-  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const {
+    data: orders = [],
+    isLoading,
+    refetch,
+  } = useFetch<Order[]>(["orders"], fetchOrders);
 
-  const handleStatusChange = async (orderId: string, newStatus: Order["status"]) => {
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [localOrders, setLocalOrders] = useState<Order[]>([]);
+
+  // Sync local state when orders load
+  if (orders.length && localOrders.length === 0) {
+    setLocalOrders(orders);
+  }
+
+  const handleStatusChange = async (
+    orderId: string,
+    newStatus: Order["status"]
+  ) => {
     try {
       setUpdatingOrderId(orderId);
-      await api.patch(`orders/${orderId}/`, { status: newStatus });
+
+      // ✅ Optimistic UI update
+      setLocalOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, status: newStatus } : o
+        )
+      );
+
+      await api.patch(`orders/${orderId}/`, {
+        status: newStatus,
+      });
+
       await refetch();
     } catch (err) {
       console.error("Failed to update order status:", err);
       alert("Failed to update order status. Try again.");
+      await refetch(); // rollback if failed
     } finally {
       setUpdatingOrderId(null);
     }
   };
 
-  if (isLoading) return <p className="p-4 text-center text-slate-500 dark:text-slate-400">Loading orders...</p>;
-  if (!orders.length) return <p className="p-4 text-center text-slate-500 dark:text-slate-400">No orders yet.</p>;
+  if (isLoading) {
+    return (
+      <p className="p-4 text-center text-slate-500 dark:text-slate-400">
+        Loading orders...
+      </p>
+    );
+  }
+
+  if (!localOrders.length) {
+    return (
+      <p className="p-4 text-center text-slate-500 dark:text-slate-400">
+        No orders yet.
+      </p>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">All Orders</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">
+        All Orders
+      </h1>
 
-      {orders.map((order) => {
-        const total = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      {localOrders.map((order) => {
+        const total = order.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
 
         return (
           <div
             key={order.id}
             className="border rounded-2xl p-6 bg-white dark:bg-slate-900 shadow hover:shadow-lg transition"
           >
-            {/* Order Header */}
+            {/* Header */}
             <div className="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400 mb-4">
               <span className="font-medium">Order #{order.id}</span>
-              <span>{new Date(order.created_at).toLocaleDateString()}</span>
+              <span>
+                {new Date(order.created_at).toLocaleDateString()}
+              </span>
             </div>
 
-            {/* Customer Info */}
+            {/* Customer */}
             <p className="mb-4 text-slate-700 dark:text-slate-300">
-              Customer: <span className="font-semibold">{order.customer_name || "Unknown"}</span> | Email:{" "}
-              <span className="font-semibold">{order.customer_email || "Unknown"}</span>
+              Customer:{" "}
+              <span className="font-semibold">
+                {order.customer_name ?? "Unknown"}
+              </span>{" "}
+              | Email:{" "}
+              <span className="font-semibold">
+                {order.customer_email ?? "Unknown"}
+              </span>
             </p>
 
-            {/* Order Status */}
+            {/* Status */}
             <div className="mb-4 flex items-center gap-3">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Status:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                Status:
+              </span>
               <select
                 value={order.status}
-                onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
                 disabled={updatingOrderId === order.id}
+                onChange={(e) =>
+                  handleStatusChange(
+                    order.id,
+                    e.target.value as Order["status"]
+                  )
+                }
                 className="border px-3 py-1 rounded-md bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary transition"
               >
                 <option value="pending">Pending</option>
@@ -63,8 +122,11 @@ export default function AdminOrders() {
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+
               {updatingOrderId === order.id && (
-                <span className="text-sm text-slate-500 dark:text-slate-400">Updating...</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  Updating...
+                </span>
               )}
             </div>
 
@@ -73,7 +135,7 @@ export default function AdminOrders() {
               {order.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition p-3 rounded-lg"
+                  className="flex items-center justify-between p-3 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -83,7 +145,9 @@ export default function AdminOrders() {
                     />
                     <div>
                       <p className="font-medium">{item.product.name}</p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm">Qty: {item.quantity}</p>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Qty: {item.quantity}
+                      </p>
                     </div>
                   </div>
                   <span className="font-semibold text-slate-900 dark:text-white">

@@ -1,30 +1,18 @@
 from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import get_object_or_404
+from django.db.models import Sum
 
-from rest_framework import (
-    viewsets,
-    permissions,
-    status,
-    serializers
-)
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-    IsAdminUser
-)
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 
-from .models import Product, CartItem, Order
-from .serializers import (
-    ProductSerializer,
-    CartItemSerializer,
-    OrderSerializer
-)
+from .models import Product, CartItem, Order, OrderItem
+from .serializers import ProductSerializer, CartItemSerializer, OrderSerializer
 
 User = get_user_model()
 
@@ -92,15 +80,12 @@ class RegisterAPIView(APIView):
         else:
             user.first_name = data["name"]
 
-        # Auto-admin (optional)
         if data["email"].lower() == "markethub250@gmail.com":
             user.is_staff = True
 
         user.save()
 
-        return_token = data.get("return_token", True)
-
-        if return_token:
+        if data.get("return_token", True):
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -130,16 +115,13 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        email = data["email"]
-        password = data["password"]
-
         try:
-            user_obj = User.objects.get(email=email)
+            user_obj = User.objects.get(email=data["email"])
             username = user_obj.username
         except User.DoesNotExist:
-            username = email
+            username = data["email"]
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=username, password=data["password"])
 
         if not user:
             return Response(
@@ -159,7 +141,7 @@ class LoginAPIView(APIView):
 
 
 # =====================================================
-# PRODUCT API (ADMIN SAFE DELETE)
+# PRODUCT API
 # =====================================================
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
@@ -171,7 +153,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [IsAuthenticatedOrReadOnly()]
 
     def get_queryset(self):
-        qs = Product.objects.filter(is_active=True)
+        qs = Product.objects.all()  # Admin sees all
         q = self.request.query_params.get("q")
         category = self.request.query_params.get("category")
 
@@ -180,6 +162,10 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if category:
             qs = qs.filter(category__iexact=category)
+
+        # Only active products for non-admin
+        if not self.request.user.is_staff:
+            qs = qs.filter(is_active=True)
 
         return qs
 
@@ -198,16 +184,10 @@ class CartItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return CartItem.objects.filter(
-            user=self.request.user
-        ).select_related("product")
+        return CartItem.objects.filter(user=self.request.user).select_related("product")
 
     def perform_create(self, serializer):
-        # Pass request in context to handle user properly
-        serializer.save(user=self.request.user, context={'request': self.request})
-
-    def perform_update(self, serializer):
-        serializer.save()
+        serializer.save(user=self.request.user)
 
 
 # =====================================================
@@ -216,6 +196,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = "id"
 
     def get_permissions(self):
         if self.action in ["update", "partial_update", "destroy"]:
@@ -224,17 +205,33 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Order.objects.all().prefetch_related("items")
-        return Order.objects.filter(
-            user=self.request.user
-        ).prefetch_related("items")
+            return Order.objects.all().prefetch_related("items__product")
+        return Order.objects.filter(user=self.request.user).prefetch_related("items__product")
 
-    @action(detail=True, methods=["post"])
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def pay(self, request, pk=None):
-        order = get_object_or_404(Order, pk=pk, user=request.user)
+        order = get_object_or_404(Order, id=pk, user=request.user)
         order.status = "processing"
         order.save()
         return Response({"status": "processing"})
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user, context={'request': self.request})
+
+# =====================================================
+# ADMIN DASHBOARD STATS API
+# =====================================================
+class AdminStatsAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        total_products = Product.objects.count()
+        low_stock = Product.objects.filter(stock__lt=10).count()
+        total_revenue = Order.objects.aggregate(total=Sum('total'))['total'] or 0
+
+        return Response({
+            "totalProducts": total_products,
+            "lowStock": low_stock,
+            "totalRevenue": float(total_revenue)
+        })
