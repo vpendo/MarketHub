@@ -18,7 +18,8 @@ export default function Catalog() {
   const setProducts = useProductStore((s) => s.setProducts);
   const wishlist = useWishlistStore((s) => s.items);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
-  const { add: addToComparison, remove: removeFromComparison, isComparing } = useComparisonStore();
+  const { add: addToComparison, remove: removeFromComparison, isComparing } =
+    useComparisonStore();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -29,14 +30,14 @@ export default function Catalog() {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    data?.forEach((p) => p.category && set.add(p.category));
+    data?.forEach((p) => p.category && set.add(p.category.trim()));
     return Array.from(set);
   }, [data]);
 
-  const filtered = useMemo(
-    () => filterProducts(data || [], search, category),
-    [data, search, category]
-  );
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    return filterProducts(data, search, category);
+  }, [data, search, category]);
 
   const orderProduct = (product: Product) => {
     const token = localStorage.getItem("access_token");

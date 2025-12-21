@@ -21,11 +21,15 @@ export default function Product() {
   );
 
   const orderProduct = async () => {
-    if (!data) return;
+    if (!data?.id) return;
     try {
+      const token = localStorage.getItem("access_token");
       const response = await fetch("/api/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ productId: data.id, quantity: 1 }),
       });
       if (!response.ok) throw new Error("Failed to place order");
@@ -76,7 +80,7 @@ export default function Product() {
         <div className="aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
           <img
             src={data.image || "/placeholder.png"}
-            alt={data.name}
+            alt={data.name || "Product Image"}
             className="w-full h-full object-cover"
           />
         </div>
@@ -93,23 +97,23 @@ export default function Product() {
             <p className="text-3xl font-bold text-primary mb-4">
               ${data.price.toFixed(2)}
             </p>
-            {data.stock !== undefined && (
-              <p
-                className={`text-sm font-medium ${
-                  data.stock > 10
-                    ? "text-green-600 dark:text-green-400"
-                    : data.stock > 0
-                    ? "text-orange-600 dark:text-orange-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
-              >
-                {data.stock > 10
-                  ? "In Stock"
-                  : data.stock > 0
-                  ? `Only ${data.stock} left`
-                  : "Out of Stock"}
-              </p>
-            )}
+            <p
+              className={`text-sm font-medium ${
+                data.stock && data.stock > 10
+                  ? "text-green-600 dark:text-green-400"
+                  : data.stock && data.stock > 0
+                  ? "text-orange-600 dark:text-orange-400"
+                  : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {data.stock === undefined
+                ? "Stock info not available"
+                : data.stock > 10
+                ? "In Stock"
+                : data.stock > 0
+                ? `Only ${data.stock} left`
+                : "Out of Stock"}
+            </p>
           </div>
 
           <div>
@@ -125,7 +129,7 @@ export default function Product() {
               <Button
                 onClick={() => addItem({ product: data, quantity: 1 })}
                 className="flex-1 bg-primary text-white flex items-center justify-center gap-2"
-                disabled={data.stock === 0}
+                disabled={!data.stock || data.stock === 0}
               >
                 <ShoppingCart className="w-5 h-5" />
                 Add to Cart
@@ -134,7 +138,7 @@ export default function Product() {
               <Button
                 onClick={orderProduct}
                 className="flex-1 border border-primary text-primary flex items-center justify-center gap-2"
-                disabled={data.stock === 0}
+                disabled={!data.stock || data.stock === 0}
               >
                 <Package className="w-5 h-5" />
                 Order Now
